@@ -149,6 +149,43 @@ body.haskp .mbody{padding-bottom:150px}
 .sumlist .s{font-size:13px;color:var(--muted);text-align:right}
 .toast{position:fixed;left:50%;bottom:170px;transform:translateX(-50%);background:#1f2328;color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;z-index:60;max-width:90vw;text-align:center}
 
+/* ── 태블릿(개인 풀이): 학교에서 주로 태블릿을 쓰므로 화면을 넓게, 글씨·버튼을 크게 ── */
+@media (min-width:700px){
+  body:not(.tv){font-size:20px}
+  body:not(.tv) .wrap,body:not(.tv) .topbar .in,body:not(.tv) .mbody,body:not(.tv) .keypad .grid{max-width:780px}
+  body:not(.tv) .title{font-size:34px}
+  body:not(.tv) .subtitle{font-size:18px}
+  body:not(.tv) .defs{font-size:19px}
+  body:not(.tv) .mitem .f{font-size:24px}
+  body:not(.tv) .mitem .s{font-size:16px}
+  body:not(.tv) .q{font-size:23px}
+  body:not(.tv) .opt{font-size:22px;min-height:60px}
+  body:not(.tv) .tmpl{font-size:32px}
+  body:not(.tv) .btn{min-height:56px;font-size:19px}
+  body:not(.tv) .fb,body:not(.tv) .hint,body:not(.tv) .cmp .box{font-size:19px}
+  body:not(.tv) .proof ol{font-size:19px}
+  body:not(.tv) .figbox svg{max-height:36vh}
+  body:not(.tv) .chip{font-size:16px}
+  body:not(.tv) .topbar .t{font-size:22px}
+  body:not(.tv) .prog{font-size:17px}
+  body:not(.tv) .back{font-size:26px;width:52px;height:52px}
+  body:not(.tv) .stephead,body:not(.tv) .fighint,body:not(.tv) .proof summary{font-size:16px}
+  body:not(.tv) .seg button{font-size:19px;padding:12px}
+  body:not(.tv) .key{height:58px;font-size:26px}
+  body:not(.tv).haskp .mbody{padding-bottom:170px}
+  body:not(.tv) textarea{font-size:19px;min-height:120px}
+  body:not(.tv) .modal{max-width:640px}
+}
+/* 가로 태블릿: 그림 왼쪽 고정, 문제 오른쪽 (TV 시연과 같은 배치) */
+@media (min-width:1000px) and (orientation:landscape){
+  body:not(.tv) .topbar .in{max-width:1300px}
+  body:not(.tv) .mbody{max-width:1300px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start;padding:18px 24px}
+  body:not(.tv) .figbox{top:76px;margin:0}
+  body:not(.tv) .figbox svg{max-height:68vh}
+  body:not(.tv) .keypad{position:static;background:transparent;border:0;padding:0;margin-top:12px}
+  body:not(.tv).haskp .mbody{padding-bottom:24px}
+}
+
 /* ── TV 시연 모드: 가로 큰 화면, 그림 왼쪽 / 문제 오른쪽 ── */
 body.tv{font-size:22px}
 body.tv .wrap{max-width:900px}
