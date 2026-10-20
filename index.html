@@ -2,212 +2,212 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>직각삼각형 5공식</title>
+<!-- 귀여운 글꼴(구글 폰트): 주아(제목·버튼), 개구(말풍선·본문). 인터넷이 없으면 기기 기본 글꼴로 보입니다. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Jua&display=swap" rel="stylesheet">
 <style>
 /* ───────────────────────────────────────────────
-   색·글꼴 — 바꾸고 싶으면 이 :root 값만 고치면 됩니다.
-   (삼각형 색은 아래 <script>의 설정 영역 COLORS에서 바꿉니다)
+   화면 색 — 바꾸고 싶으면 이 :root 값만 고치면 됩니다.
+   (도형 색은 아래 <script> 설정 영역의 COLORS에서)
    ─────────────────────────────────────────────── */
 :root{
-  --paper:#fbfaf6;      /* 노트 종이 배경 */
-  --ink:#1f2328;        /* 기본 글씨 */
-  --muted:#6b7280;      /* 보조 글씨 */
-  --line:#e6e2d6;       /* 구분선·테두리 */
-  --rule:#eef1f6;       /* 노트 줄 */
-  --card:#ffffff;
-  --accent:#1f4fd1;     /* 버튼 강조 */
-  --ok:#15803d;
-  --ok-bg:#e8f6ec;
+  --chat-bg:#b9d0e5;   /* 대화창 배경(하늘빛) */
+  --head:#a6c1da;      /* 대화창 위쪽 막대 */
+  --list-bg:#eef4fa;   /* 시작 화면 배경 */
+  --me:#ffe45c;        /* 학생 말풍선(노랑) */
+  --bot:#ffffff;       /* 직각이 말풍선 */
+  --ink:#1d2430;
+  --muted:#5f6b7a;
+  --line:#d9e2ec;
+  --accent:#2d6cdf;
+  --ok:#14804a;
   --bad:#c2410c;
-  --bad-bg:#fdf0e8;
-  --marker:#ffd84d;     /* 형광펜(변 강조) */
-  --angle:#e11d48;      /* 각 강조 */
-  --radius:14px;
+  --marker:#ffd84d;    /* 형광펜 */
+  --angle:#e11d48;     /* 각 표시 */
+  --dock:#f7f9fb;      /* 아래 입력 영역 */
+  /* 글꼴 — 바꾸려면 위 <link>의 글꼴 이름과 이 두 줄을 함께 고칩니다 */
+  --font-body:"Gaegu","Apple SD Gothic Neo","Malgun Gothic",sans-serif;  /* 말풍선·본문 */
+  --font-head:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;    /* 제목·버튼 */
 }
 *{box-sizing:border-box}
-html,body{margin:0}
+html,body{margin:0;height:100%}
 body{
-  background:var(--paper);
-  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px);
-  color:var(--ink);
-  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
-  font-size:17px;line-height:1.55;
-  -webkit-text-size-adjust:100%;
-  touch-action:manipulation; /* 더블탭 확대 방지 */
+  background:var(--list-bg);color:var(--ink);
+  font-family:var(--font-body);font-weight:700;
+  font-size:19px;line-height:1.5; /* 개구는 글자가 작아 보여서 조금 크게 */-webkit-text-size-adjust:100%;
+  touch-action:manipulation;
 }
 button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+.ol{text-decoration:overline;text-decoration-thickness:1.5px} /* 선분 기호 AB̅ */
 /* 문자(a, b, c, x, y, h)는 교과서처럼 기울임 세리프 */
-i.v{font-family:"Times New Roman",Times,serif;font-style:italic;font-size:1.12em;padding:0 .04em}
-sup{font-size:.68em;line-height:0}
-.ol{text-decoration:overline;text-decoration-thickness:1.5px} /* 선분 기호 */
+i.v{font-family:"Times New Roman",Times,serif;font-style:italic;font-size:1.12em;font-weight:400;padding:0 .04em}
+sup{font-family:"Times New Roman",Times,serif;font-weight:400;font-size:.72em;line-height:0}
+.legend{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:2px 0}
+.chip{font-family:var(--font-head);font-size:13px;padding:1px 9px;border-radius:999px;color:#fff}
+.defs{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 10px;padding:4px 12px 8px;font-size:18px}
 .hidden{display:none!important}
 
-/* ── 공통 레이아웃 ── */
-.wrap{max-width:560px;margin:0 auto;padding:16px 16px 40px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 16px;font-weight:600;min-height:48px}
-.btn:active{transform:translateY(1px)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-.btn.ghost{background:transparent}
+/* ── 시작 화면(채팅 목록 느낌) ── */
+.home{max-width:560px;margin:0 auto;padding-bottom:30px}
+.homehead{background:var(--head);padding:18px 16px 14px;display:flex;align-items:center;gap:12px}
+.homehead h1{margin:0;font-size:22px;letter-spacing:-.02em}
+.homehead p{margin:0;font-size:13px;color:#33475b}
+.figcard{background:#fff;margin:14px 16px 0;border-radius:16px;padding:8px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.figcard svg{display:block;width:100%;height:auto;max-height:260px}
+.modes{display:flex;background:#dbe6f1;border-radius:12px;padding:4px;margin:12px 16px}
+.modes button{flex:1;border:0;background:transparent;border-radius:9px;padding:10px;font-weight:700;color:var(--muted)}
+.modes button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.rooms{background:#fff;margin:0 16px;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.room{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:#fff;padding:14px;border-bottom:1px solid #eef2f6}
+.room:last-child{border-bottom:0}
+.room .av{flex:none}
+.room .tt{font-weight:800;font-size:16px}
+.room .pv{margin-top:3px;font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.room .mid{flex:1;min-width:0}
+.room .st{flex:none;font-size:13px;font-weight:800}
+.room.done .st{color:var(--ok)}
+.room.locked{opacity:.5}
+.badge{display:inline-block;background:#ff5a4f;color:#fff;border-radius:999px;font-size:12px;padding:1px 8px}
+.sumbtn{display:block;margin:14px 16px 0;width:calc(100% - 32px);border:0;background:var(--accent);color:#fff;font-weight:800;border-radius:14px;padding:14px}
+
+/* ── 직각이 프로필 ── */
+.av{width:40px;height:40px;border-radius:15px;background:#14b8a6;display:grid;place-items:center;overflow:hidden}
+.av svg{width:100%;height:100%}
+
+/* ── 대화 화면 ── */
+.chat{position:fixed;left:0;right:0;top:0;height:var(--app-h,100dvh);display:flex;flex-direction:column;background:var(--chat-bg)}
+.chathead{flex:none;background:var(--head);display:flex;align-items:center;gap:6px;padding:6px 8px;padding-top:calc(6px + env(safe-area-inset-top))}
+.chathead .back{border:0;background:transparent;font-size:24px;width:44px;height:44px;border-radius:10px}
+.chathead .t{flex:1;min-width:0;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chathead .p{font-size:13px;color:#33475b;font-weight:700;margin-right:4px}
+.chathead .figbtn{border:0;background:#ffffffaa;border-radius:10px;padding:8px 12px;font-weight:700;font-size:14px}
+.chatbody{flex:1;min-height:0;display:flex}
+.tvfig{display:none}
+.chatcol{flex:1;min-width:0;display:flex;flex-direction:column;max-width:640px;margin:0 auto;width:100%}
+.log{flex:1;min-height:0;overflow-y:auto;padding:12px 10px 16px;-webkit-overflow-scrolling:touch}
+
+.msg{display:flex;gap:8px;margin:4px 0;align-items:flex-start}
+.msg.me{justify-content:flex-end}
+.msg .avs{width:40px;flex:none}
+.msg .col{max-width:78%;min-width:0}
+.msg .name{font-size:13px;color:#33475b;margin:0 0 3px 2px}
+.bub{background:var(--bot);border-radius:4px 16px 16px 16px;padding:9px 12px;line-height:1.7;word-break:keep-all;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.05)}
+.msg.me .bub{background:var(--me);border-radius:16px 4px 16px 16px;white-space:pre-wrap}
+.msg.cont .bub{border-radius:16px}
+.bub.fig{padding:6px;width:270px;max-width:100%}
+.bub.fig svg{display:block;width:100%;height:auto}
+.bub.wide{width:min(320px,100%)}
+.bub .k{font-size:12px;font-weight:800;color:var(--accent);margin-bottom:4px}
+.bub.model{background:#eef5ff;border:1px solid #cfe0fb}
+.bub.hint{background:#fff8dc;border:1px solid #f1dc8f}
+.bub.ok{background:#e9f7ee}
+.card ol{margin:0;padding-left:22px}
+.card li{padding:5px 0;border-bottom:1px dashed #e3e8ef}
+.card li:last-child{border-bottom:0}
+.card .ct{font-weight:800;margin-bottom:4px}
+.chk label{display:flex;gap:8px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.chk input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--ok)}
+.typing{display:inline-flex;gap:4px;padding:12px 14px}
+.typing i{width:7px;height:7px;border-radius:50%;background:#9aa7b6;animation:tp 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes tp{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+/* ── 아래 입력 영역 ── */
+.dock{flex:none;background:var(--dock);border-top:1px solid #d6dee8;padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
+.dock.busy{opacity:.5;pointer-events:none}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{border:1.5px solid #c9d6e4;background:#fff;border-radius:999px;padding:10px 16px;font-size:17px;font-weight:600;min-height:46px}
+.opt.wrong{opacity:.4;text-decoration:line-through}
+.btns{display:flex;gap:8px;margin-top:8px}
+.btns:first-child{margin-top:0}
+.btn{flex:1;border:1px solid #c9d6e4;background:#fff;border-radius:12px;padding:11px 12px;font-weight:700;min-height:46px;font-size:15px}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
-.btn:disabled{opacity:.45;cursor:default}
-.row{display:flex;gap:8px;flex-wrap:wrap}
-.row>.btn{flex:1}
-
-/* ── 시작 화면 ── */
-.title{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:8px 0 2px}
-.subtitle{color:var(--muted);margin:0 0 14px;font-size:15px}
-.seg{display:flex;background:#eef0f4;border-radius:12px;padding:4px;margin:14px 0}
-.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:10px;font-weight:600;color:var(--muted)}
-.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-.defs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;font-size:15px;margin-top:6px}
-.mlist{display:flex;flex-direction:column;gap:10px;margin-top:14px}
-.mitem{display:flex;align-items:center;gap:12px;text-align:left;width:100%;border:1px solid var(--line);background:#fff;border-radius:var(--radius);padding:14px}
-.mnum{flex:none;width:34px;height:34px;border-radius:50%;background:#eef2ff;color:var(--accent);display:grid;place-items:center;font-weight:800}
-.mitem .f{font-size:20px;font-weight:700}
-.mitem .s{font-size:13px;color:var(--muted)}
-.mitem .st{margin-left:auto;font-weight:700;font-size:14px;white-space:nowrap}
-.mitem.done{border-color:#b7e2c4;background:#f6fcf8}
-.mitem.done .mnum{background:var(--ok);color:#fff}
-.mitem.done .st{color:var(--ok)}
-.mitem.locked{opacity:.55}
-
-/* ── 미션 화면 ── */
-.topbar{position:sticky;top:0;z-index:20;background:rgba(251,250,246,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
-.topbar .in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 12px}
-.back{border:0;background:transparent;font-size:22px;width:44px;height:44px;border-radius:10px}
-.topbar .t{font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.prog{font-size:14px;color:var(--muted);font-weight:600}
-.pbar{height:4px;background:var(--line)}
-.pbar>div{height:100%;background:var(--accent);transition:width .3s}
-
-.mbody{max-width:560px;margin:0 auto;padding:10px 16px 24px}
-.figbox{position:sticky;top:61px;z-index:10;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:6px 8px 4px;margin-bottom:12px}
-.figbox svg{display:block;width:100%;height:auto;max-height:30vh}
-.fighint{text-align:center;font-size:13px;font-weight:700;color:#9a6b00;padding-bottom:2px}
-body.tv .fighint{font-size:18px}
-.legend{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;min-height:24px;padding-bottom:2px}
-.chip{font-size:13px;font-weight:700;padding:1px 9px;border-radius:999px;color:#fff}
-
-.stephead{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px}
-.q{font-size:18px;font-weight:600;margin:0 0 12px}
-.opts{display:flex;flex-direction:column;gap:8px}
-.opt{text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;font-size:18px;min-height:52px}
-.opt.right{border-color:var(--ok);background:var(--ok-bg)}
-.opt.wrong{border-color:var(--bad);background:var(--bad-bg);animation:shake .3s}
-@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-
-.tmpl{font-size:24px;text-align:center;margin:6px 0 14px;line-height:1.8}
-.blank{display:inline-block;min-width:64px;padding:0 10px;border:2px dashed var(--accent);border-radius:10px;background:#f4f7ff;min-height:1.6em;vertical-align:middle;line-height:1.5}
-.blank.filled{border-style:solid}
-.blank.right{border-color:var(--ok);background:var(--ok-bg)}
-.blank.wrong{border-color:var(--bad);background:var(--bad-bg);animation:shake .3s}
-.caret{display:inline-block;width:2px;height:1.1em;background:var(--accent);vertical-align:-.15em;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-
-textarea{width:100%;min-height:96px;border:1.5px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:16px;resize:vertical;background:#fff}
-.cmp{display:grid;grid-template-columns:1fr;gap:8px;margin:4px 0 12px}
-.cmp .box{border-radius:12px;padding:10px 12px;font-size:16px}
-.cmp .mine{background:#f3f4f6;white-space:pre-wrap}
-.cmp .model{background:#eef6ff;border:1px solid #cfe0fb}
-.cmp .lab{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:2px}
-
-.fb{margin:12px 0 0;padding:10px 12px;border-radius:12px;font-weight:600;font-size:16px}
-.fb.ok{background:var(--ok-bg);color:var(--ok)}
-.fb.bad{background:var(--bad-bg);color:var(--bad)}
-.fb.info{background:#eef2ff;color:var(--accent)}
-.hints{margin-top:10px;display:flex;flex-direction:column;gap:6px}
-.hint{background:#fff8e1;border:1px solid #f4dd8e;border-radius:12px;padding:9px 12px;font-size:15px}
-.hint b{color:#9a6b00}
-.actions{margin-top:14px}
-
-.proof{margin-top:12px}
-.proof summary{cursor:pointer;font-weight:700;color:var(--muted);font-size:14px;padding:4px 0}
-.proof ol{margin:6px 0 0;padding-left:26px;font-size:16px}
-.proof li{padding:2px 0}
-.proof li.now{color:var(--muted)}
-
-/* ── 화면 키패드(빈칸 단계에서만). 휴대폰 키보드가 그림을 가리지 않도록 직접 만든 키패드 ── */
-.keypad{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#e9ebf0;border-top:1px solid #d5d8df;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
-.keypad .grid{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
-.key{border:0;background:#fff;border-radius:10px;height:48px;font-size:22px;box-shadow:0 1px 0 #c5c8cf}
-.key.fn{background:#d9dce3;font-size:22px;font-weight:600}
-body.haskp .mbody{padding-bottom:150px}
+.btn.sm{flex:none}
+.btn:disabled{opacity:.4}
+.preview{text-align:center;font-size:22px;padding:4px 0 8px}
+.box{display:inline-block;min-width:58px;border:2px dashed var(--accent);border-radius:10px;padding:0 8px;background:#f2f6ff;vertical-align:middle;line-height:1.5}
+.box.on{border-style:solid}
+.caret{display:inline-block;width:2px;height:1em;background:var(--accent);vertical-align:-.12em;animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.keys{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.key{border:0;background:#fff;border-radius:10px;height:46px;font-size:21px;font-weight:600;box-shadow:0 1px 0 #c3cbd6;font-family:"Times New Roman",serif}
+.key.lt{font-style:italic;font-size:24px}
+.key.fn{background:#dfe4ec;font-family:var(--font-head)}
+textarea{width:100%;border:1.5px solid #c9d6e4;border-radius:14px;padding:10px 12px;font:inherit;font-size:16px;resize:none;background:#fff;max-height:30vh;min-height:48px;display:block}
 
 /* ── 팝업 ── */
-.overlay{position:fixed;inset:0;z-index:50;background:rgba(20,24,32,.45);display:flex;align-items:center;justify-content:center;padding:16px}
-.modal{background:var(--paper);border-radius:18px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
-.modal h2{margin:0 0 4px;font-size:22px}
-.modal .big{font-size:30px;font-weight:800;text-align:center;margin:10px 0 14px}
-.sheet{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background-image:repeating-linear-gradient(to bottom,transparent 0 33px,var(--rule) 33px 34px)}
-.sheet ol{margin:0;padding-left:24px;font-size:17px;line-height:34px}
-.note{font-size:13px;color:var(--muted);margin:8px 0 14px}
-.sumlist{display:flex;flex-direction:column;gap:8px;margin:10px 0 14px}
-.sumlist div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.sumlist .f{font-size:22px;font-weight:800}
-.sumlist .s{font-size:13px;color:var(--muted);text-align:right}
-.toast{position:fixed;left:50%;bottom:170px;transform:translateX(-50%);background:#1f2328;color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;z-index:60;max-width:90vw;text-align:center}
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(20,24,32,.5);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:18px;max-width:560px;width:100%;max-height:90vh;overflow:auto;padding:18px}
+.modal h2{margin:0 0 8px;font-size:20px}
+.modal svg{display:block;width:100%;height:auto}
+.sum div{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+.sum .f{font-weight:800;font-size:18px}
+.sum .s{font-size:13px;color:var(--muted)}
 
 /* ── 태블릿(개인 풀이): 학교에서 주로 태블릿을 쓰므로 화면을 넓게, 글씨·버튼을 크게 ── */
 @media (min-width:700px){
-  body:not(.tv){font-size:20px}
-  body:not(.tv) .wrap,body:not(.tv) .topbar .in,body:not(.tv) .mbody,body:not(.tv) .keypad .grid{max-width:780px}
-  body:not(.tv) .title{font-size:34px}
-  body:not(.tv) .subtitle{font-size:18px}
-  body:not(.tv) .defs{font-size:19px}
-  body:not(.tv) .mitem .f{font-size:24px}
-  body:not(.tv) .mitem .s{font-size:16px}
-  body:not(.tv) .q{font-size:23px}
-  body:not(.tv) .opt{font-size:22px;min-height:60px}
-  body:not(.tv) .tmpl{font-size:32px}
-  body:not(.tv) .btn{min-height:56px;font-size:19px}
-  body:not(.tv) .fb,body:not(.tv) .hint,body:not(.tv) .cmp .box{font-size:19px}
-  body:not(.tv) .proof ol{font-size:19px}
-  body:not(.tv) .figbox svg{max-height:36vh}
-  body:not(.tv) .chip{font-size:16px}
-  body:not(.tv) .topbar .t{font-size:22px}
-  body:not(.tv) .prog{font-size:17px}
-  body:not(.tv) .back{font-size:26px;width:52px;height:52px}
-  body:not(.tv) .stephead,body:not(.tv) .fighint,body:not(.tv) .proof summary{font-size:16px}
-  body:not(.tv) .seg button{font-size:19px;padding:12px}
-  body:not(.tv) .key{height:58px;font-size:26px}
-  body:not(.tv).haskp .mbody{padding-bottom:170px}
-  body:not(.tv) textarea{font-size:19px;min-height:120px}
-  body:not(.tv) .modal{max-width:640px}
+  body:not(.tv){font-size:23px}
+  body:not(.tv) .home{max-width:780px}
+  body:not(.tv) .homehead h1{font-size:30px}
+  body:not(.tv) .figcard svg{max-height:340px}
+  body:not(.tv) .room .tt{font-size:21px}
+  body:not(.tv) .room .pv{font-size:19px}
+  body:not(.tv) .chatcol{max-width:820px}
+  body:not(.tv) .msg .col{max-width:74%}
+  body:not(.tv) .av,body:not(.tv) .msg .avs{width:48px;height:48px}
+  body:not(.tv) .msg .avs{height:auto}
+  body:not(.tv) .bub.fig{width:420px}
+  body:not(.tv) .bub.wide{width:min(460px,100%)}
+  body:not(.tv) .bub .k,body:not(.tv) .msg .name{font-size:16px}
+  body:not(.tv) .opt{font-size:23px;padding:12px 22px;min-height:56px}
+  body:not(.tv) .btn{font-size:20px;min-height:56px}
+  body:not(.tv) .preview{font-size:32px}
+  body:not(.tv) .key{height:58px;font-size:27px}
+  body:not(.tv) textarea{font-size:21px}
+  body:not(.tv) .chathead .t{font-size:22px}
+  body:not(.tv) .chathead .figbtn{font-size:17px;padding:10px 14px}
 }
-/* 가로 태블릿: 그림 왼쪽 고정, 문제 오른쪽 (TV 시연과 같은 배치) */
+/* 가로 태블릿: 그림을 왼쪽에 고정(그림 말풍선 대신), 대화는 오른쪽 — TV 시연과 같은 배치 */
 @media (min-width:1000px) and (orientation:landscape){
-  body:not(.tv) .topbar .in{max-width:1300px}
-  body:not(.tv) .mbody{max-width:1300px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start;padding:18px 24px}
-  body:not(.tv) .figbox{top:76px;margin:0}
-  body:not(.tv) .figbox svg{max-height:68vh}
-  body:not(.tv) .keypad{position:static;background:transparent;border:0;padding:0;margin-top:12px}
-  body:not(.tv).haskp .mbody{padding-bottom:24px}
+  body:not(.tv) .tvfig{display:flex;flex-direction:column;justify-content:center;flex:1;min-width:0;padding:16px}
+  body:not(.tv) .tvfig .in{background:#fff;border-radius:20px;padding:12px}
+  body:not(.tv) .tvfig svg{display:block;width:100%;height:auto;max-height:76vh}
+  body:not(.tv) .chatcol{flex:1;max-width:none;margin:0;border-left:1px solid #a9bfd4}
+  body:not(.tv) .chathead .figbtn{display:none}
 }
 
-/* ── TV 시연 모드: 가로 큰 화면, 그림 왼쪽 / 문제 오른쪽 ── */
+/* ── TV 시연: 그림 왼쪽 크게, 대화 오른쪽 ── */
 body.tv{font-size:22px}
-body.tv .wrap{max-width:900px}
-body.tv .topbar .in,body.tv .mbody{max-width:1500px}
-body.tv .mbody{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start;padding:20px 28px}
-body.tv .figbox{position:sticky;top:80px;margin:0}
-body.tv .figbox svg{max-height:70vh}
-body.tv .chip{font-size:18px}
-body.tv .q{font-size:28px}
-body.tv .opt{font-size:26px;padding:14px 18px}
-body.tv .tmpl{font-size:38px}
-body.tv .fb,body.tv .hint{font-size:22px}
-body.tv .proof ol{font-size:22px}
-body.tv .proof summary,body.tv .stephead{font-size:18px}
-body.tv .topbar .t{font-size:24px}
-body.tv .keypad{position:static;background:transparent;border:0;padding:0;margin-top:14px}
-body.tv .keypad .key{height:60px;font-size:30px}
-body.tv .keypad .key.fn{font-size:26px}
-body.tv .prog{font-size:20px}
-body.tv .back{font-size:30px;width:56px;height:56px}
-body.tv.haskp .mbody{padding-bottom:24px}
-body.tv .cmp .box{font-size:22px}
+body.tv .home{max-width:900px}
+body.tv .chathead .t{font-size:26px}
+body.tv .chathead .p{font-size:20px}
+body.tv .chathead .figbtn{display:none}
+body.tv .tvfig{display:flex;flex-direction:column;justify-content:center;flex:1.1;min-width:0;padding:16px}
+body.tv .tvfig .in{background:#fff;border-radius:20px;padding:14px}
+body.tv .tvfig svg{display:block;width:100%;height:auto;max-height:78vh}
+body.tv .chatcol{flex:1;max-width:none;margin:0;border-left:1px solid #a9bfd4}
+body.tv .msg .col{max-width:88%}
+body.tv .opt{font-size:26px;padding:12px 22px}
+body.tv .btn{font-size:22px;min-height:58px}
+body.tv .preview{font-size:34px}
+body.tv .key{height:58px;font-size:28px}
+body.tv .name{font-size:18px}
+body.tv .bub{font-size:25px}
+body.tv .bub .k{font-size:17px}
+body.tv .av{width:52px;height:52px}
+body.tv .msg .avs{width:52px}
+/* ── 글꼴: 제목·버튼·이름표는 주아(굵기 하나뿐이라 400으로), 본문·말풍선은 개구 ── */
+.homehead h1,.room .tt,.room .st,.chathead,.chathead *,.modes button,.sumbtn,.badge,.btn,.opt,.name,
+.bub .k,.card .ct,.modal h2,.sum .f,.preview{font-family:var(--font-head);font-weight:400}
+textarea{font-family:var(--font-body);font-weight:700;font-size:18px}
+.homehead p,.room .pv,.sum .s{font-size:16px}
+.bub .k,.msg .name{font-size:14px}
+body.tv .bub{font-size:30px} /* 개구는 작아 보여서 TV에서 더 크게 */
+svg text{font-weight:400} /* 그림 속 A, B, C는 교과서처럼 보통 굵기 */
 </style>
 </head>
 <body>
@@ -217,22 +217,34 @@ body.tv .cmp .box{font-size:22px}
 /* =====================================================================
    설정 영역 — 선생님이 직접 고치는 곳
    ---------------------------------------------------------------------
+   · BOT_NAME : 대화 상대 이름
+   · TYPING_MS : 직각이가 말하기 전 "…"을 보여주는 시간(1000 = 1초)
+   · WRONG_LIMIT : 몇 번 틀리면 [정답 보고 넘어가기]가 나오는지
    · COLORS : 삼각형 색
-   · MISSIONS : 미션별 단계. 각 단계의 type은 세 가지입니다.
-       - 'choice' : 선택형. options(보기)와 answer(정답 보기의 번호, 0부터 셈)
-       - 'blank'  : 빈칸형. template의 □ 자리에 들어갈 답을 answer에 적습니다.
-                    cx와 xc, c×x처럼 같은 식은 자동으로 모두 정답 처리됩니다.
-                    (입력에 쓸 수 있는 기호: a b c x y h ² × + ( ) )
-       - 'essay'  : 서술형. model(모범 답안)을 보여주고 학생이 스스로 점검합니다.
-   · hints : [1차 힌트(방향 제시), 2차 힌트(거의 정답)]
-   · proof : 이 단계를 마치면 '증명' 칸에 한 줄로 쌓이는 문장
-   · hl : 그림 힌트 — tri(색칠할 삼각형), angles(표시할 각), sides(형광펜 칠할 변)
-         처음엔 기본 그림만 보이고, 한 번 틀리거나 [힌트]를 누르면 '그림 힌트'로 나타납니다.
-         (힌트 순서: 그림 힌트 → hints의 1차 → 2차)
-         sides에 'BC'라고 쓰면 노란 형광펜, 'BC:ABC'라고 쓰면 △ABC 색 형광펜
-         각 이름은 가운데 글자가 꼭짓점입니다. 예) 'ABC' = ∠B, 'BAD' = ∠BAD
-   ※ 글 속의 소문자 a, b, c, x, y, h는 자동으로 기울임꼴(수학 문자)로 바뀝니다.
+   · MISSIONS : 미션별 대본
+       title, sub : 목록에 보이는 이름 / formula : 증명할 목표(대화 위쪽에 계속 보임)
+       intro : 미션을 시작할 때 직각이가 하는 말 ({ fig: {} }는 그림 말풍선 자리)
+       end : 미션을 마칠 때 하는 말
+       steps : 단계 목록. type은 세 가지입니다.
+         - 'choice' : 보기 고르기. options(보기), answer(정답 보기 번호, 0부터 셈)
+         - 'blank'  : 빈칸. template의 □ 자리 정답을 answer에.
+                      cx와 xc, c×x처럼 같은 식은 자동으로 모두 정답 처리됩니다.
+                      (입력에 쓸 수 있는 기호: a b c x y h ² × + ( ) )
+         - 'essay'  : 서술. model(모범 답안)을 보여주고 학생이 스스로 점검
+       hints : [1차 힌트, 2차 힌트]
+       proof : 이 단계를 마치면 증명 카드에 쌓이는 한 줄
+       hl : 그림 힌트 — tri(색칠할 삼각형), angles(표시할 각), sides(형광펜 칠할 변)
+            각 이름은 가운데 글자가 꼭짓점('ABC' = ∠B). 변은 'BC'면 노랑, 'BC:ABC'면 △ABC 색.
+            질문할 때는 기본 그림만 보내고, 한 번 틀리거나 [힌트]를 누르면 '그림 힌트'로 보냄
+            (힌트 순서: 그림 힌트 → hints의 1차 → 2차)
+       needs : 먼저 끝내야 열리는 미션 번호(0부터 셈)
+   ※ 글 속의 소문자 a, b, c, x, y, h는 기울임 수학 문자로,
+     두 글자 선분 이름(AB, BD …)은 선분 기호(윗줄)로 자동으로 바뀝니다.
    ===================================================================== */
+const BOT_NAME = '직각이';
+const TYPING_MS = { solo: 500, tv: 300 };
+const WRONG_LIMIT = 2;
+
 const COLORS = {
   ABC: '#2563eb', // 파랑
   DBA: '#ea7a17', // 주황
@@ -241,133 +253,160 @@ const COLORS = {
 
 const MISSIONS = [
   { // ───────────── 미션 1 ─────────────
+    title: '미션 1', sub: '큰 삼각형과 왼쪽 삼각형',
     formula: 'a² = cx', basis: '△ABC ∽ △DBA',
+    intro: [
+      `안녕! 나는 ${BOT_NAME}야 📐`,
+      '∠A = 90°인 직각삼각형 ABC에서 꼭짓점 A에서 빗변 BC에 내린 수선의 발을 D라고 할게.',
+      { fig: {} },
+      'AB = a, AC = b, BC = c, BD = x, CD = y, AD = h 로 놓고, a² = cx 임을 증명해 보자!',
+    ],
+    end: 'a² = cx 증명 완료! 🎉 완성된 증명을 공책에 옮겨 적어 봐.',
     steps: [
       { type:'choice', hl:{tri:['ABC','DBA']},
         q:'△ABC와 닮은 작은 삼각형 중 꼭짓점 B를 함께 가진 것은? (대응하는 꼭짓점 순서대로)',
         options:['△DBA','△BDA','△ABD','△DAC'], answer:0,
-        hints:['△ABC의 꼭짓점 A, B, C에 각각 어느 꼭짓점이 대응하는지 생각해 보세요.',
-               'A(직각) ↔ D(직각), B ↔ B, C ↔ A 순서로 써요.'],
+        hints:['△ABC의 꼭짓점 A, B, C에 각각 어느 꼭짓점이 대응하는지 생각해 봐.',
+               'A(직각) ↔ D(직각), B ↔ B, C ↔ A 순서로 써야 해.'],
         proof:'△ABC와 △DBA에서' },
       { type:'choice', hl:{tri:['ABC','DBA'],angles:['ABC']},
         q:'두 삼각형에서 공통인 각은?',
         options:['∠A','∠B','∠C'], answer:1,
-        hints:['두 삼각형이 함께 가진 꼭짓점을 찾아보세요.',
-               '꼭짓점 B의 각은 두 삼각형 모두에 들어 있어요.'],
+        hints:['두 삼각형이 함께 가진 꼭짓점을 찾아봐.',
+               '꼭짓점 B의 각은 두 삼각형 모두에 들어 있어.'],
         proof:'∠B는 공통' },
       { type:'choice', hl:{tri:['ABC','DBA'],angles:['BAC','BDA']},
         q:'크기가 같은 직각의 짝은?',
         options:['∠BAC = ∠BDA = 90°','∠BAD = ∠BDA = 90°','∠ABD = ∠BAC = 90°'], answer:0,
-        hints:['그림에서 직각 표시가 있는 곳을 찾아보세요.',
-               '△ABC의 직각은 ∠BAC, △DBA의 직각은 ∠BDA예요.'],
+        hints:['그림에서 직각 표시가 있는 곳을 찾아봐.',
+               '△ABC의 직각은 ∠BAC, △DBA의 직각은 ∠BDA야.'],
         proof:'∠BAC = ∠BDA = 90°' },
       { type:'essay', hl:{tri:['ABC','DBA'],angles:['ABC','BAC','BDA']},
-        q:'△ABC와 △DBA가 닮은 이유를 닮음 조건과 함께 써 보세요.',
+        q:'△ABC와 △DBA가 닮은 이유를 닮음 조건과 함께 써 봐.',
         model:'∠B는 공통이고, ∠BAC = ∠BDA = 90°이므로 두 쌍의 대응각의 크기가 각각 같다. 따라서 △ABC ∽ △DBA (AA 닮음)',
         proof:'∴ △ABC ∽ △DBA (AA 닮음)' },
       { type:'blank', hl:{tri:['ABC','DBA'],sides:['BC:ABC','AB:ABC','AB:DBA','BD:DBA']},
-        q:'닮은 도형에서 대응변의 길이의 비는 같아요. 빈칸을 채우세요.',
+        q:'닮은 도형에서 대응변의 길이의 비는 같아. 빈칸을 채워 봐.',
         template:'c : a = a : □', answer:'x',
-        hints:['△ABC의 BC(=c)에 대응하는 변은 △DBA의 BA(=a)예요. 그럼 △ABC의 AB(=a)에 대응하는 변은?',
-               'AB에 대응하는 변은 DB이고, 그 길이는 x예요.'],
+        hints:['△ABC의 BC(=c)에 대응하는 변은 △DBA의 BA(=a)야. 그럼 △ABC의 AB(=a)에 대응하는 변은?',
+               'AB에 대응하는 변은 DB이고, 그 길이는 x야.'],
         proof:'BC : BA = BA : BD 이므로 c : a = a : x' },
       { type:'blank', hl:{tri:['ABC','DBA']},
-        q:'비례식을 정리하세요. (외항의 곱 = 내항의 곱)',
+        q:'비례식을 정리해 봐. (외항의 곱 = 내항의 곱)',
         template:'a² = □', answer:'cx',
-        hints:['c : a = a : x 에서 바깥쪽 두 항(외항)을 곱해 보세요.',
-               '외항의 곱은 c × x 예요.'],
+        hints:['c : a = a : x 에서 바깥쪽 두 항(외항)을 곱해 봐.',
+               '외항의 곱은 c × x야.'],
         proof:'∴ a² = cx' },
     ]
   },
   { // ───────────── 미션 2 ─────────────
+    title: '미션 2', sub: '큰 삼각형과 오른쪽 삼각형',
     formula: 'b² = cy', basis: '△ABC ∽ △DAC',
+    intro: [
+      '이번엔 b² = cy 를 증명해 보자! 💪',
+      { fig: {} },
+      '미션 1에서 한 방법을 떠올려 봐.',
+    ],
+    end: 'b² = cy 도 증명했어! 🎉 이제 미션 5가 열렸을 거야.',
     steps: [
       { type:'choice', hl:{tri:['ABC','DAC']},
         q:'△ABC와 닮은 작은 삼각형 중 꼭짓점 C를 함께 가진 것은? (대응하는 꼭짓점 순서대로)',
         options:['△DAC','△ADC','△CDA','△DBA'], answer:0,
-        hints:['△ABC의 꼭짓점 A, B, C에 각각 어느 꼭짓점이 대응하는지 생각해 보세요.',
-               'A(직각) ↔ D(직각), B ↔ A, C ↔ C 순서로 써요.'],
+        hints:['△ABC의 꼭짓점 A, B, C에 각각 어느 꼭짓점이 대응하는지 생각해 봐.',
+               'A(직각) ↔ D(직각), B ↔ A, C ↔ C 순서로 써야 해.'],
         proof:'△ABC와 △DAC에서' },
       { type:'choice', hl:{tri:['ABC','DAC'],angles:['ACB']},
         q:'두 삼각형에서 공통인 각은?',
         options:['∠A','∠B','∠C'], answer:2,
-        hints:['두 삼각형이 함께 가진 꼭짓점을 찾아보세요.',
-               '꼭짓점 C의 각은 두 삼각형 모두에 들어 있어요.'],
+        hints:['두 삼각형이 함께 가진 꼭짓점을 찾아봐.',
+               '꼭짓점 C의 각은 두 삼각형 모두에 들어 있어.'],
         proof:'∠C는 공통' },
       { type:'choice', hl:{tri:['ABC','DAC'],angles:['BAC','ADC']},
         q:'크기가 같은 직각의 짝은?',
         options:['∠DAC = ∠ADC = 90°','∠BAC = ∠ADC = 90°','∠ACD = ∠BAC = 90°'], answer:1,
-        hints:['그림에서 직각 표시가 있는 곳을 찾아보세요.',
-               '△ABC의 직각은 ∠BAC, △DAC의 직각은 ∠ADC예요.'],
+        hints:['그림에서 직각 표시가 있는 곳을 찾아봐.',
+               '△ABC의 직각은 ∠BAC, △DAC의 직각은 ∠ADC야.'],
         proof:'∠BAC = ∠ADC = 90°' },
       { type:'essay', hl:{tri:['ABC','DAC'],angles:['ACB','BAC','ADC']},
-        q:'△ABC와 △DAC가 닮은 이유를 닮음 조건과 함께 써 보세요.',
+        q:'△ABC와 △DAC가 닮은 이유를 닮음 조건과 함께 써 봐.',
         model:'∠C는 공통이고, ∠BAC = ∠ADC = 90°이므로 두 쌍의 대응각의 크기가 각각 같다. 따라서 △ABC ∽ △DAC (AA 닮음)',
         proof:'∴ △ABC ∽ △DAC (AA 닮음)' },
       { type:'blank', hl:{tri:['ABC','DAC'],sides:['BC:ABC','AC:ABC','AC:DAC','CD:DAC']},
-        q:'대응변의 길이의 비가 같음을 이용해 빈칸을 채우세요.',
+        q:'대응변의 길이의 비가 같음을 이용해 빈칸을 채워 봐.',
         template:'c : b = b : □', answer:'y',
-        hints:['△ABC의 BC(=c)에 대응하는 변은 △DAC의 AC(=b)예요. 그럼 △ABC의 AC(=b)에 대응하는 변은?',
-               'AC에 대응하는 변은 DC이고, 그 길이는 y예요.'],
+        hints:['△ABC의 BC(=c)에 대응하는 변은 △DAC의 AC(=b)야. 그럼 △ABC의 AC(=b)에 대응하는 변은?',
+               'AC에 대응하는 변은 DC이고, 그 길이는 y야.'],
         proof:'BC : AC = AC : DC 이므로 c : b = b : y' },
       { type:'blank', hl:{tri:['ABC','DAC']},
-        q:'비례식을 정리하세요. (외항의 곱 = 내항의 곱)',
+        q:'비례식을 정리해 봐. (외항의 곱 = 내항의 곱)',
         template:'b² = □', answer:'cy',
-        hints:['c : b = b : y 에서 바깥쪽 두 항(외항)을 곱해 보세요.',
-               '외항의 곱은 c × y 예요.'],
+        hints:['c : b = b : y 에서 바깥쪽 두 항(외항)을 곱해 봐.',
+               '외항의 곱은 c × y야.'],
         proof:'∴ b² = cy' },
     ]
   },
   { // ───────────── 미션 3 ─────────────
+    title: '미션 3', sub: '두 작은 삼각형',
     formula: 'h² = xy', basis: '△DBA ∽ △DAC',
+    intro: [
+      '이번엔 큰 삼각형 말고, 작은 삼각형 두 개를 비교해서 h² = xy 를 증명해 볼 거야.',
+      { fig: {} },
+    ],
+    end: 'h² = xy 증명 완료! 🎉 이 미션이 제일 어려웠을 거야. 잘했어!',
     steps: [
       { type:'choice', hl:{tri:['DBA','DAC'],angles:['BDA','ADC']},
         q:'△DBA와 △DAC에서 크기가 같은 직각의 짝은?',
         options:['∠BAD = ∠DAC = 90°','∠BDA = ∠ADC = 90°','∠BAC = ∠ADC = 90°'], answer:1,
-        hints:['두 작은 삼각형은 선분 AD를 함께 가지고 있어요. AD는 BC에 내린 수선이에요.',
-               '수선의 발 D에서 생기는 두 각이에요.'],
+        hints:['두 작은 삼각형은 선분 AD를 함께 가지고 있어. AD는 BC에 내린 수선이야.',
+               '수선의 발 D에서 생기는 두 각이야.'],
         proof:'△DBA와 △DAC에서 ∠BDA = ∠ADC = 90°' },
       { type:'choice', hl:{tri:['DBA','DAC'],angles:['BAD']},
         q:'∠BAD와 크기가 같은 각은?',
         options:['∠B','∠C','∠DAC'], answer:1,
-        hints:['△DBA에서 ∠B + ∠BAD = 90°예요. △ABC에서는 ∠B + ? = 90°일까요?',
-               '△ABC에서 ∠B + ∠C = 90°예요.'],
+        hints:['△DBA에서 ∠B + ∠BAD = 90°야. △ABC에서는 ∠B + ? = 90°일까?',
+               '△ABC에서 ∠B + ∠C = 90°야.'],
         proof:'∠BAD = ∠C' },
       { type:'essay', hl:{tri:['ABC','DBA'],angles:['ABC','BAD','ACB']},
-        q:'∠BAD = ∠C인 이유를 써 보세요.',
+        q:'∠BAD = ∠C인 이유를 써 봐.',
         model:'△DBA에서 ∠B + ∠BAD = 90°이고, △ABC에서 ∠B + ∠C = 90°이다. 따라서 ∠BAD = 90° − ∠B = ∠C',
         proof:'(∵ ∠B + ∠BAD = 90°, ∠B + ∠C = 90°)' },
       { type:'choice', hl:{tri:['DBA','DAC'],angles:['BDA','ADC','BAD','ACB']},
         q:'두 삼각형의 닮음을 대응 순서에 맞게 바르게 쓴 것은?',
         options:['△DBA ∽ △DCA (AA 닮음)','△DBA ∽ △ADC (AA 닮음)','△DBA ∽ △DAC (AA 닮음)'], answer:2,
-        hints:['직각끼리(D ↔ D), ∠BAD와 ∠C가 대응해요. 남은 B는 어디에 대응할까요?',
-               'D ↔ D, B ↔ A, A ↔ C 순서예요.'],
+        hints:['직각끼리(D ↔ D), ∠BAD와 ∠C가 대응해. 남은 B는 어디에 대응할까?',
+               'D ↔ D, B ↔ A, A ↔ C 순서야.'],
         proof:'∴ △DBA ∽ △DAC (AA 닮음)' },
       { type:'blank', hl:{tri:['DBA','DAC'],sides:['BD:DBA','AD:DBA','AD:DAC','CD:DAC']},
-        q:'대응변의 길이의 비가 같음을 이용해 빈칸을 채우세요.',
+        q:'대응변의 길이의 비가 같음을 이용해 빈칸을 채워 봐.',
         template:'x : h = h : □', answer:'y',
-        hints:['△DBA의 DB(=x)에 대응하는 변은 △DAC의 DA(=h)예요. 그럼 △DBA의 DA(=h)에 대응하는 변은?',
-               'DA에 대응하는 변은 DC이고, 그 길이는 y예요.'],
+        hints:['△DBA의 DB(=x)에 대응하는 변은 △DAC의 DA(=h)야. 그럼 △DBA의 DA(=h)에 대응하는 변은?',
+               'DA에 대응하는 변은 DC이고, 그 길이는 y야.'],
         proof:'BD : AD = AD : CD 이므로 x : h = h : y' },
       { type:'blank', hl:{tri:['DBA','DAC']},
-        q:'비례식을 정리하세요. (외항의 곱 = 내항의 곱)',
+        q:'비례식을 정리해 봐. (외항의 곱 = 내항의 곱)',
         template:'h² = □', answer:'xy',
-        hints:['x : h = h : y 에서 바깥쪽 두 항(외항)을 곱해 보세요.',
-               '외항의 곱은 x × y 예요.'],
+        hints:['x : h = h : y 에서 바깥쪽 두 항(외항)을 곱해 봐.',
+               '외항의 곱은 x × y야.'],
         proof:'∴ h² = xy' },
     ]
   },
   { // ───────────── 미션 4 ─────────────
+    title: '미션 4', sub: '넓이로 증명하기',
     formula: 'ab = ch', basis: '△ABC의 넓이',
+    intro: [
+      '이번엔 닮음 말고 넓이로 증명해 보자! 목표는 ab = ch 야.',
+      { fig: {} },
+    ],
+    end: 'ab = ch 증명 완료! 🎉 같은 넓이를 두 가지로 나타내는 방법, 기억해 둬.',
     steps: [
       { type:'choice', hl:{tri:['ABC'],sides:['AB','AC']},
         q:'AB를 밑변으로 할 때, △ABC의 높이가 되는 선분은?',
         options:['AC (길이 b)','AD (길이 h)','BC (길이 c)'], answer:0,
-        hints:['높이는 밑변에 수직인 선분이에요.',
-               '∠A = 90°이므로 AC ⊥ AB예요.'],
+        hints:['높이는 밑변에 수직인 선분이야.',
+               '∠A = 90°이므로 AC ⊥ AB야.'],
         proof:'AB를 밑변으로 하면 높이는 AC' },
       { type:'blank', hl:{tri:['ABC'],sides:['AB','AC']},
-        q:'△ABC의 넓이를 a, b로 나타내세요.',
+        q:'△ABC의 넓이를 a, b로 나타내 봐.',
         template:'(△ABC의 넓이) = ½ × a × □', answer:'b',
         hints:['삼각형의 넓이 = ½ × (밑변) × (높이)',
                '밑변 AB = a, 높이 AC = ?'],
@@ -375,89 +414,98 @@ const MISSIONS = [
       { type:'choice', hl:{tri:['ABC'],sides:['BC','AD']},
         q:'BC를 밑변으로 할 때, △ABC의 높이가 되는 선분은?',
         options:['AB (길이 a)','AD (길이 h)','AC (길이 b)'], answer:1,
-        hints:['꼭짓점 A에서 BC에 수직으로 내린 선분을 찾아보세요.',
-               'AD ⊥ BC예요.'],
+        hints:['꼭짓점 A에서 BC에 수직으로 내린 선분을 찾아봐.',
+               'AD ⊥ BC야.'],
         proof:'BC를 밑변으로 하면 높이는 AD' },
       { type:'blank', hl:{tri:['ABC'],sides:['BC','AD']},
-        q:'△ABC의 넓이를 c, h로 나타내세요.',
+        q:'△ABC의 넓이를 c, h로 나타내 봐.',
         template:'(△ABC의 넓이) = ½ × c × □', answer:'h',
         hints:['삼각형의 넓이 = ½ × (밑변) × (높이)',
                '밑변 BC = c, 높이 AD = ?'],
         proof:'(△ABC의 넓이) = ½ × c × h' },
       { type:'essay', hl:{tri:['ABC']},
-        q:'두 식이 같은 이유와, 여기서 얻을 수 있는 결론을 써 보세요.',
+        q:'두 식이 같은 이유와, 여기서 얻을 수 있는 결론을 써 봐.',
         model:'두 식은 모두 같은 삼각형 ABC의 넓이이므로 ½ab = ½ch이다. 양변에 2를 곱하면 ab = ch',
         proof:'같은 삼각형의 넓이이므로 ½ab = ½ch' },
       { type:'blank', hl:{tri:['ABC'],sides:['AB','AC','BC','AD']},
-        q:'식을 정리하세요.',
+        q:'식을 정리해 봐.',
         template:'ab = □', answer:'ch',
-        hints:['½ab = ½ch 의 양변에 2를 곱해 보세요.',
-               '오른쪽은 c × h가 남아요.'],
+        hints:['½ab = ½ch 의 양변에 2를 곱해 봐.',
+               '오른쪽은 c × h가 남아.'],
         proof:'∴ ab = ch' },
     ]
   },
   { // ───────────── 미션 5 ─────────────
+    title: '미션 5', sub: '피타고라스 정리',
     formula: 'a² + b² = c²', basis: '미션 1 + 미션 2',
+    intro: [
+      '드디어 마지막 미션이야! 🔥',
+      '미션 1, 2에서 증명한 식으로 피타고라스 정리 a² + b² = c² 를 증명해 보자.',
+      { fig: {} },
+    ],
+    end: '피타고라스 정리까지 증명했어! 🏆 다섯 공식을 모두 정복했어!',
     needs: [0, 1], // 미션 1, 2를 끝내야 열립니다 (0부터 셈)
     steps: [
       { type:'blank', hl:{tri:['ABC','DBA']},
-        q:'미션 1에서 증명한 식을 떠올려 보세요.',
+        q:'미션 1에서 증명한 식을 떠올려 봐.',
         template:'a² = □', answer:'cx',
-        hints:['△ABC ∽ △DBA에서 얻은 식이에요.', 'a² = c × ?'],
+        hints:['△ABC ∽ △DBA에서 얻은 식이야.', 'a² = c × ?'],
         proof:'미션 1에서 a² = cx' },
       { type:'blank', hl:{tri:['ABC','DAC']},
-        q:'미션 2에서 증명한 식을 떠올려 보세요.',
+        q:'미션 2에서 증명한 식을 떠올려 봐.',
         template:'b² = □', answer:'cy',
-        hints:['△ABC ∽ △DAC에서 얻은 식이에요.', 'b² = c × ?'],
+        hints:['△ABC ∽ △DAC에서 얻은 식이야.', 'b² = c × ?'],
         proof:'미션 2에서 b² = cy' },
       { type:'blank', hl:{tri:['ABC']},
-        q:'두 식을 변끼리 더하세요.',
+        q:'두 식을 변끼리 더해 봐.',
         template:'a² + b² = cx + □', answer:'cy',
-        hints:['왼쪽끼리, 오른쪽끼리 더해요.', 'b²에 해당하는 오른쪽 식을 쓰면 돼요.'],
+        hints:['왼쪽끼리, 오른쪽끼리 더해.', 'b²에 해당하는 오른쪽 식을 쓰면 돼.'],
         proof:'두 식을 더하면 a² + b² = cx + cy' },
       { type:'blank', hl:{tri:['ABC']},
-        q:'공통인 c로 묶으세요.',
+        q:'공통인 c로 묶어 봐.',
         template:'a² + b² = c(□ + y)', answer:'x',
-        hints:['cx + cy = c × ( ? + y )', '분배법칙을 거꾸로 써요.'],
+        hints:['cx + cy = c × ( ? + y )', '분배법칙을 거꾸로 써.'],
         proof:'= c(x + y)' },
       { type:'essay', hl:{tri:['ABC'],sides:['BD:DBA','CD:DAC']},
-        q:'x + y는 무엇과 같은지, 그 이유와 함께 써 보세요.',
+        q:'x + y는 무엇과 같은지, 그 이유와 함께 써 봐.',
         model:'점 D는 변 BC 위에 있으므로 BD + DC = BC이다. 즉 x + y = c',
         proof:'점 D는 BC 위에 있으므로 x + y = c' },
       { type:'blank', hl:{tri:['ABC'],sides:['AB','AC','BC']},
-        q:'결론을 쓰세요.',
+        q:'결론을 써 봐.',
         template:'a² + b² = □', answer:'c²',
-        hints:['c(x + y)에서 x + y = c를 넣어 보세요.', 'c × c = ?'],
+        hints:['c(x + y)에서 x + y = c를 넣어 봐.', 'c × c = ?'],
         proof:'∴ a² + b² = c²' },
     ]
   },
 ];
 
-/* 몇 번 틀리면 [정답 보고 넘어가기]가 나올지 */
-const WRONG_LIMIT = 2;
+/* 정리 요약 카드에 나오는 문장 */
+const SUMMARY = MISSIONS.map((m, i) => ({ f: m.formula, s: `미션 ${i + 1} · ${m.basis}` }));
 
 /* ===================== 설정 영역 끝 ===================== */
 
 
 /* ---------- 상태 ----------
-   저장하지 않는 앱이라 모든 것이 이 객체에만 있습니다(새로고침하면 초기화). */
+   저장하지 않는 앱이라 모든 것이 여기에만 있습니다(새로고침하면 초기화). */
 const state = {
-  mode: 'solo',      // 'solo' 개인 풀이 | 'tv' TV 시연
-  done: new Set(),   // 완료한 미션 번호
-  m: null,           // 지금 미션 번호
-  s: 0,              // 지금 단계 번호
-  phase: 'answer',   // 'answer' 푸는 중 | 'correct' 맞힘 | 'revealed' 정답 봄 | 'compare' 서술 비교 중
-  input: '',         // 빈칸 입력 내용
-  essay: '',         // 서술 입력 내용
-  wrong: 0,          // 이 단계에서 틀린 횟수
-  hint: 0,           // 펼친 힌트 수
-  picked: null,      // 선택형: 마지막으로 고른 보기
-  figHint: false,    // 그림 힌트(강조)를 펼쳤는지
-  feedback: null,    // {kind, text}
-  proof: [],         // 쌓인 증명 줄
+  mode: 'solo', done: new Set(),
+  m: null,          // 지금 미션 번호
+  steps: null,      // 지금 진행 중인 단계 목록(도전 문제 자유 증명 중엔 null)
+  s: 0, wrong: 0, hint: 0, input: '', essay: '',
+  wrongPicked: new Set(),
+  proof: [],
+  hl: {},           // 지금 그림 강조
+  lastFigKey: '',   // 같은 그림을 연달아 보내지 않으려고
+  token: 0,         // 미션을 나가면 진행 중이던 직각이 말을 끊기 위한 표시
+  busy: false,
+  finished: false,
 };
-
 const app = document.getElementById('app');
+const isTV = () => state.mode === 'tv';
+// 그림이 옆에 고정된 화면(TV 시연, 가로 태블릿)에서는 그림 말풍선 대신 옆 그림을 바꾼다
+const sideFig = () => isTV() || window.matchMedia('(min-width:1000px) and (orientation:landscape)').matches;
+const M = () => MISSIONS[state.m];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 /* ---------- 글자 표시 ----------
    소문자 a,b,c,x,y,h → 기울임 수학 문자, ² → 위 첨자.
@@ -609,360 +657,389 @@ function drawFigure(hl = {}) {
   return s + `<div class="legend">${legend}</div>`;
 }
 
-/* ---------- 화면: 시작 ---------- */
-function isLocked(i) {
-  const need = MISSIONS[i].needs || [];
-  return need.some(n => !state.done.has(n));
-}
-function renderStart() {
-  document.querySelectorAll('.toast').forEach(e => e.remove());
-  document.body.classList.remove('haskp');
-  const items = MISSIONS.map((m, i) => {
+// 직각이 프로필: 직각삼각형 얼굴
+const AVATAR = `<svg viewBox="0 0 40 40"><rect width="40" height="40" fill="#14b8a6"/>
+  <path d="M9 31 L9 9 L33 31 Z" fill="#fff" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M9 26 h5 v5" fill="none" stroke="#14b8a6" stroke-width="1.6"/>
+  <circle cx="15" cy="21" r="1.8" fill="#1d2430"/><circle cx="21" cy="25" r="1.8" fill="#1d2430"/>
+  <path d="M14.5 26.5 q2 2.6 4.4 1.4" stroke="#1d2430" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>`;
+
+/* ---------- 시작 화면 ---------- */
+function isLocked(i) { return (MISSIONS[i].needs || []).some(n => !state.done.has(n)); }
+function renderHome() {
+  state.m = null; state.token++;
+  const rooms = MISSIONS.map((m, i) => {
     const done = state.done.has(i), locked = isLocked(i);
-    const st = done ? '✓ 완료' : locked ? '🔒 미션 1·2 후' : '';
-    return `<button class="mitem ${done ? 'done' : ''} ${locked ? 'locked' : ''}" data-m="${i}">
-      <span class="mnum">${i + 1}</span>
-      <span><div class="f">${fmt(m.formula)}</div><div class="s">${fmt(m.basis)}</div></span>
+    const st = done ? '✓ 완료' : locked ? '🔒 1·2 완료 후' : '<span class="badge">NEW</span>';
+    return `<button class="room ${done ? 'done' : ''} ${locked ? 'locked' : ''}" data-m="${i}">
+      <span class="av">${AVATAR}</span>
+      <span class="mid"><div class="tt">${esc(m.title)} · ${esc(m.sub)}</div><div class="pv">${fmt(m.formula)} &nbsp;<small>${fmt(m.basis)}</small></div></span>
       <span class="st">${st}</span></button>`;
   }).join('');
   const allDone = state.done.size === MISSIONS.length;
-  app.innerHTML = `<div class="wrap">
-    <h1 class="title">직각삼각형 5공식</h1>
-    <p class="subtitle">${fmt('∠A = 90°인 직각삼각형 ABC에서 꼭짓점 A에서 빗변 BC에 내린 수선의 발을 D라고 할 때')}</p>
-    <div class="card">
-      <div class="figbox" style="position:static;border:0;padding:0;margin:0">${drawFigure({})}</div>
-      <div class="defs">
-        <span>${fmt('AB = a')}</span><span>${fmt('AC = b')}</span><span>${fmt('BC = c')}</span>
-        <span>${fmt('BD = x')}</span><span>${fmt('CD = y')}</span><span>${fmt('AD = h')}</span>
-      </div>
-    </div>
-    <div class="seg" role="tablist">
+  app.innerHTML = `<div class="home">
+    <div class="homehead"><span class="av">${AVATAR}</span>
+      <div><h1>직각삼각형 5공식</h1><p>${BOT_NAME}와 함께 증명해 보자!</p></div></div>
+    <div class="figcard">${drawFigure({})}
+      <div class="defs">${['AB = a','AC = b','BC = c','BD = x','CD = y','AD = h'].map(t => `<span>${fmt(t)}</span>`).join('')}</div></div>
+    <div class="modes">
       <button data-mode="solo" class="${state.mode === 'solo' ? 'on' : ''}">개인 풀이</button>
       <button data-mode="tv" class="${state.mode === 'tv' ? 'on' : ''}">TV 시연</button>
     </div>
-    <div class="mlist">${items}</div>
-    ${allDone ? `<div class="actions"><button class="btn primary" style="width:100%" id="sumBtn">다섯 공식 모아보기</button></div>` : ''}
+    <div class="rooms">${rooms}</div>
+    ${allDone ? `<button class="sumbtn" id="sumBtn">정리 요약 보기</button>` : ''}
   </div>`;
-  app.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+  app.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => {
+    state.mode = b.dataset.mode; document.body.classList.toggle('tv', isTV()); renderHome();
+  });
   app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
     const i = +b.dataset.m;
-    if (isLocked(i)) return toast('미션 1과 미션 2를 먼저 완료하세요');
+    if (isLocked(i)) return alertModal('미션 1과 미션 2를 먼저 완료해 줘!');
     startMission(i);
   });
   const sb = document.getElementById('sumBtn'); if (sb) sb.onclick = showSummary;
   window.scrollTo(0, 0);
 }
-function setMode(mode) {
-  state.mode = mode;
-  document.body.classList.toggle('tv', mode === 'tv');
-  renderStart();
-}
 
-/* ---------- 화면: 미션 ---------- */
-function startMission(i) {
-  state.m = i; state.s = 0; state.proof = [];
-  resetStep();
-  renderMission();
-  window.scrollTo(0, 0);
-}
-function resetStep() {
-  state.phase = 'answer'; state.input = ''; state.essay = '';
-  state.wrong = 0; state.hint = 0; state.picked = null; state.feedback = null; state.figHint = false;
-}
-const curMission = () => MISSIONS[state.m];
-const curStep = () => curMission().steps[state.s];
-const isTV = () => state.mode === 'tv';
-
-function renderMission() {
-  document.querySelectorAll('.toast').forEach(e => e.remove());
-  const M = curMission(), st = curStep(), n = M.steps.length;
-  const showKeypad = st.type === 'blank' && state.phase === 'answer';
-  document.body.classList.toggle('haskp', showKeypad);
-
-  app.innerHTML = `
-  <div class="topbar"><div class="in">
-    <button class="back" id="backBtn" aria-label="목록으로">←</button>
-    <div class="t">미션 ${state.m + 1} &nbsp;${fmt(M.formula)}</div>
-    <div class="prog">${state.s + 1}/${n}</div>
-  </div><div class="pbar"><div style="width:${(state.s / n) * 100}%"></div></div></div>
-  <div class="mbody">
-    <div class="figbox">${drawFigure(figHintShown(st) ? st.hl : {})}${figHintShown(st) && state.phase === 'answer' ? '<div class="fighint">💡 그림 힌트</div>' : ''}</div>
-    <div class="panel">
-      <div class="card" id="stepCard">${renderStepBody(st)}</div>
-      ${showKeypad ? renderKeypad() : ''}
-      ${renderProof()}
+/* ---------- 대화 화면 ---------- */
+function buildChat() {
+  app.innerHTML = `<div class="chat">
+    <div class="chathead">
+      <button class="back" id="backBtn" aria-label="목록으로">←</button>
+      <div class="t">${esc(M().title)} · ${fmt(M().formula)}</div>
+      <div class="p" id="prog"></div>
+      <button class="figbtn" id="figBtn">그림 📐</button>
     </div>
-  </div>`;
-  bindStep(st);
+    <div class="chatbody">
+      <div class="tvfig"><div class="in" id="tvfig"></div></div>
+      <div class="chatcol"><div class="log" id="log"></div><div class="dock" id="dock"></div></div>
+    </div></div>`;
   document.getElementById('backBtn').onclick = askLeave;
+  document.getElementById('figBtn').onclick = () => modal(`<h2>그림</h2>${drawFigure(state.hl)}
+    <div class="btns"><button class="btn pri" data-x>닫기</button></div>`, (ov, close) => ov.querySelector('[data-x]').onclick = close);
+  fitViewport();
+}
+const logEl = () => document.getElementById('log');
+const dockEl = () => document.getElementById('dock');
+function scrollDown() { const l = logEl(); if (l) requestAnimationFrame(() => l.scrollTop = l.scrollHeight); }
+
+/* 말풍선 붙이기. 카톡처럼 같은 사람이 연달아 말하면 프로필은 첫 말풍선에만 */
+function lastSender() { const l = logEl(); const last = l && l.lastElementChild; return last ? last.dataset.who : null; }
+function addMsg(who, html, cls = '') {
+  const l = logEl(); if (!l) return null;
+  const cont = lastSender() === who;
+  const row = document.createElement('div');
+  row.className = `msg ${who} ${cont ? 'cont' : ''}`;
+  row.dataset.who = who;
+  if (who === 'bot') {
+    row.innerHTML = `<div class="avs">${cont ? '' : `<div class="av">${AVATAR}</div>`}</div>
+      <div class="col">${cont ? '' : `<div class="name">${BOT_NAME}</div>`}<div class="bub ${cls}">${html}</div></div>`;
+  } else {
+    row.innerHTML = `<div class="col"><div class="bub ${cls}">${html}</div></div>`;
+  }
+  l.appendChild(row); scrollDown();
+  return row;
+}
+function addUser(html) { addMsg('me', html); }
+
+/* 직각이가 말하기: "…"을 잠깐 보여준 뒤 말풍선으로 바꾼다.
+   items: 글자 / {fig:hl} / {html, cls} 를 차례대로 */
+async function say(...items) {
+  const tk = state.token;
+  setBusy(true);
+  for (const it of items) {
+    if (it && it.fig) { // 그림 말풍선
+      const hl = mergeHl(it.fig);
+      setFigure(hl);
+      if (sideFig()) continue;           // TV·가로 태블릿은 왼쪽 큰 그림만 바꾼다
+      const key = JSON.stringify(hl);
+      if (key === state.lastFigKey) continue; // 같은 그림이면 다시 안 보냄
+      state.lastFigKey = key;
+    }
+    const typing = addMsg('bot', '<span class="typing"><i></i><i></i><i></i></span>');
+    if (typing) typing.querySelector('.bub').style.padding = '0';
+    await sleep(TYPING_MS[state.mode]);
+    if (tk !== state.token) return false; // 그 사이 미션을 나갔으면 중단
+    const bub = typing.querySelector('.bub');
+    bub.style.padding = '';
+    if (typeof it === 'string') bub.innerHTML = fmt(it);
+    else if (it.fig) { bub.classList.add('fig'); bub.innerHTML = (it.caption ? `<div class="k">${it.caption}</div>` : '') + drawFigure(state.hl); }
+    else { bub.innerHTML = it.html; if (it.cls) bub.className = 'bub ' + it.cls; }
+    scrollDown();
+  }
+  setBusy(false);
+  return tk === state.token;
+}
+function setBusy(b) { state.busy = b; const d = dockEl(); if (d) d.classList.toggle('busy', b); }
+function mergeHl(h) { return { ...h }; }
+function setFigure(hl) { state.hl = hl; const f = document.getElementById('tvfig'); if (f) f.innerHTML = drawFigure(hl); }
+function setProgress() {
+  const p = document.getElementById('prog');
+  if (p) p.textContent = state.steps && !state.finished ? `${Math.min(state.s + 1, state.steps.length)}/${state.steps.length}` : '';
 }
 
-/* 그림 강조(색칠한 삼각형·각·변)는 답을 알려주는 셈이라, 처음엔 기본 그림만 보여준다.
-   한 번 틀리거나 [힌트]를 누르면 '그림 힌트'로 강조가 나타나고, 정답을 맞힌 뒤에도 확인용으로 보인다. */
+/* ---------- 진행 ---------- */
+async function startMission(i) {
+  state.m = i; state.token++; state.finished = false;
+  state.steps = M().steps;
+  state.s = 0; state.proof = []; state.lastFigKey = '';
+  resetStep();
+  buildChat(); setFigure(mergeHl({})); setProgress();
+  dockEl().innerHTML = '';
+  if (!await say(...M().intro)) return;
+  askStep();
+}
+function resetStep() { state.wrong = 0; state.hint = 0; state.input = ''; state.essay = ''; state.wrongPicked = new Set(); state.figHint = false; }
+
+/* 그림 강조(색칠한 삼각형·각·변)는 답을 알려주는 셈이라 질문할 때는 기본 그림만 보낸다.
+   한 번 틀리거나 [힌트]를 누르면 '그림 힌트'로 보내고, 그다음 글 힌트로 넘어간다. */
 function hasFigHint(st) { const h = st.hl || {}; return ['tri','angles','sides'].some(k => (h[k] || []).length); }
-function figHintShown(st) { return hasFigHint(st) && (state.figHint || state.wrong > 0 || state.phase !== 'answer'); }
+function figHintPending(st) { return hasFigHint(st) && !state.figHint; }
+function figHintItems(st) {
+  state.figHint = true;
+  return sideFig() ? [{ fig: st.hl }, '왼쪽 그림에 힌트를 표시했어! 👈']
+                : [{ fig: st.hl, caption: '💡 그림 힌트' }];
+}
+function confirmFigure(st) { if (sideFig()) setFigure(mergeHl(st.hl || {})); } // 옆 그림: 정답 뒤 확인용 강조
+const curStep = () => state.steps[state.s];
 
-function renderStepBody(st) {
-  let h = `<div class="stephead">${state.s + 1}단계 · ${{choice:'고르기', blank:'빈칸 채우기', essay:'서술하기'}[st.type]}</div>`;
-  h += `<p class="q">${fmt(st.q)}</p>`;
-
-  if (st.type === 'choice') {
-    h += `<div class="opts">` + st.options.map((o, i) => {
-      let cls = '';
-      if ((state.phase === 'correct' || state.phase === 'revealed') && i === st.answer) cls = 'right';
-      else if (state.phase === 'answer' && state.picked === i) cls = 'wrong';
-      return `<button class="opt ${cls}" data-opt="${i}">${fmt(o)}</button>`;
-    }).join('') + `</div>`;
-  }
-
-  if (st.type === 'blank') {
-    let inner, cls = 'blank';
-    if (state.phase === 'answer') {
-      inner = fmt(state.input) + '<span class="caret"></span>';
-      if (state.input) cls += ' filled';
-      if (state.feedback && state.feedback.kind === 'bad') cls += ' wrong';
-    } else {
-      inner = fmt(state.phase === 'revealed' ? st.answer : state.input);
-      cls += ' filled right';
-    }
-    const [before, after] = st.template.split('□');
-    h += `<div class="tmpl">${fmt(before)}<span class="${cls}">${inner}</span>${fmt(after || '')}</div>`;
-  }
-
-  if (st.type === 'essay') {
-    // 개인 풀이: 쓰기 → 내 답과 모범 답안 나란히 / TV 시연: 말로 답한 뒤 모범 답안만 공개
-    if (state.phase === 'answer') {
-      if (!isTV()) h += `<textarea id="essay" placeholder="여기에 이유를 써 보세요">${esc(state.essay)}</textarea>`;
-    } else {
-      h += `<div class="cmp">
-        ${isTV() ? '' : `<div class="box mine"><div class="lab">내 답</div>${esc(state.essay)}</div>`}
-        <div class="box model"><div class="lab">모범 답안</div>${fmt(st.model)}</div></div>`;
-    }
-  }
-
-  if (state.feedback) h += `<div class="fb ${state.feedback.kind}">${fmt(state.feedback.text)}</div>`;
-
-  // 힌트 순서: 그림 힌트 → 글 힌트 1 → 글 힌트 2
-  const hintItems = [];
-  if (state.phase === 'answer' && figHintShown(st)) hintItems.push('<b>그림 힌트</b> · 위 그림에 강조 표시를 했어요.');
-  if (st.hints) st.hints.slice(0, state.hint).forEach((t, i) => hintItems.push(`<b>힌트 ${i + 1}</b> · ${fmt(t)}`));
-  if (hintItems.length) h += `<div class="hints">` + hintItems.map(x => `<div class="hint">${x}</div>`).join('') + `</div>`;
-
-  h += `<div class="actions row">${renderButtons(st)}</div>`;
-  return h;
+async function askStep() {
+  const st = curStep(); setProgress();
+  if (!await say({ fig: {} }, st.q)) return; // 기본 그림만
+  showStepDock();
+}
+function addProof(line) {
+  if (line.startsWith('+') && state.proof.length) state.proof[state.proof.length - 1] += ' ' + line.slice(1).trim();
+  else state.proof.push(line);
+}
+async function goNext() {
+  state.s++; resetStep();
+  if (state.s >= state.steps.length) return finishMission();
+  askStep();
+}
+async function finishMission() {
+  state.finished = true; state.done.add(state.m); setProgress();
+  dockEl().innerHTML = '';
+  const items = [];
+  items.push(M().end, proofCard('완성된 증명', state.proof));
+  if (!await say(...items)) return;
+  const next = MISSIONS.findIndex((_, k) => !state.done.has(k) && !isLocked(k));
+  const all = state.done.size === MISSIONS.length;
+  dockEl().innerHTML = `<div class="btns">
+    <button class="btn" data-home>목록으로</button>
+    ${all ? `<button class="btn pri" data-sum>정리 요약 보기</button>`
+      : next >= 0 ? `<button class="btn pri" data-next>${esc(MISSIONS[next].title)} 시작 →</button>` : ''}</div>`;
+  const d = dockEl();
+  d.querySelector('[data-home]').onclick = renderHome;
+  const n = d.querySelector('[data-next]'); if (n) n.onclick = () => startMission(next);
+  const s = d.querySelector('[data-sum]'); if (s) s.onclick = () => { renderHome(); showSummary(); };
+}
+function proofCard(title, lines) {
+  return { cls: 'wide card', html: `<div class="ct">📝 ${esc(title)}</div><ol>${lines.map(l => `<li>${fmt(l)}</li>`).join('')}</ol>` };
 }
 
-function renderButtons(st) {
-  const last = state.s === curMission().steps.length - 1;
-  const nextLabel = last ? '미션 완료 ✓' : '다음 단계 →';
-  if (state.phase === 'correct' || state.phase === 'revealed') {
-    return `<button class="btn primary" data-act="next">${nextLabel}</button>`;
-  }
-  if (st.type === 'essay') {
-    if (isTV()) return `<button class="btn primary" data-act="model">모범 답안 보기</button>`;
-    if (state.phase === 'compare') {
-      return `<button class="btn ghost" data-act="retry">다시 볼게요</button>
-              <button class="btn ok" data-act="selfok">맞게 썼어요 →</button>`;
-    }
-    return `<button class="btn primary" data-act="compare">모범 답안과 비교하기</button>`;
-  }
-  // 선택형·빈칸형
+/* ---------- 입력 영역(단계 유형별) ---------- */
+function showStepDock() {
+  const st = curStep();
+  if (st.type === 'choice') return dockChoice(st);
+  if (st.type === 'blank') return dockBlank(st);
+  return dockEssay(st);
+}
+function extraButtons(st) { // 힌트 / 정답 보기
   let b = '';
-  const figPending = hasFigHint(st) && !figHintShown(st);
-  const hasMoreHint = figPending || (st.hints && state.hint < st.hints.length);
-  const anyShown = figHintShown(st) || state.hint > 0;
-  if (hasMoreHint) b += `<button class="btn ghost" data-act="hint">힌트${anyShown ? ' 더 보기' : ''}</button>`;
-  if (st.type === 'blank') b += `<button class="btn primary" data-act="check">확인</button>`;
-  if (isTV()) b += `<button class="btn" data-act="reveal">정답 공개</button>`;
-  else if (state.wrong >= WRONG_LIMIT) b += `<button class="btn" data-act="reveal">정답 보고 넘어가기</button>`;
+  const more = figHintPending(st) || (st.hints && state.hint < st.hints.length);
+  const shown = state.figHint || state.hint > 0;
+  if (more) b += `<button class="btn" data-hint>힌트${shown ? ' 더' : ''} 💡</button>`;
+  if (isTV()) b += `<button class="btn" data-reveal>정답 공개</button>`;
+  else if (state.wrong >= WRONG_LIMIT) b += `<button class="btn" data-reveal>정답 보고 넘어가기</button>`;
   return b;
 }
-
-function renderKeypad() {
-  const keys = ['a','b','c','x','y','h','²','×','+','(',')','⌫'];
-  return `<div class="keypad"><div class="grid">` + keys.map(k => {
-    const fn = '²×+()⌫'.includes(k);
-    const label = 'abcxyh'.includes(k) ? fmt(k) : k;
-    return `<button class="key ${fn ? 'fn' : ''}" data-key="${k}">${label}</button>`;
-  }).join('') + `</div></div>`;
+function bindExtra(st) {
+  const d = dockEl();
+  const h = d.querySelector('[data-hint]'); if (h) h.onclick = () => giveHint(st);
+  const r = d.querySelector('[data-reveal]'); if (r) r.onclick = () => reveal(st);
 }
 
-function renderProof() {
-  if (!state.proof.length) return '';
-  const lines = state.proof.map(t => `<li>${fmt(t)}</li>`).join('') + `<li class="now">…</li>`;
-  return `<details class="proof card" open><summary>지금까지의 증명 (${state.proof.length}줄)</summary><ol>${lines}</ol></details>`;
+function dockChoice(st) {
+  const ex = extraButtons(st);
+  dockEl().innerHTML = `<div class="opts">${st.options.map((o, i) =>
+      `<button class="opt ${state.wrongPicked.has(i) ? 'wrong' : ''}" data-opt="${i}">${fmt(o)}</button>`).join('')}</div>
+    ${ex ? `<div class="btns">${ex}</div>` : ''}`;
+  dockEl().querySelectorAll('[data-opt]').forEach(b => b.onclick = () => pickOption(st, +b.dataset.opt));
+  bindExtra(st);
 }
-
-/* ---------- 버튼 연결 ---------- */
-function bindStep(st) {
-  app.querySelectorAll('[data-opt]').forEach(b => b.onclick = () => pickOption(+b.dataset.opt));
-  app.querySelectorAll('[data-key]').forEach(b => b.onclick = () => pressKey(b.dataset.key));
-  app.querySelectorAll('[data-act]').forEach(b => b.onclick = () => ACT[b.dataset.act]());
-  const ta = document.getElementById('essay');
-  if (ta) ta.oninput = () => { state.essay = ta.value; };
-}
-
-const ACT = {
-  hint() { // 그림 힌트를 아직 안 봤으면 그림부터, 그다음 글 힌트
-    const st = curStep();
-    if (hasFigHint(st) && !figHintShown(st)) state.figHint = true; else state.hint++;
-    renderMission();
-  },
-  check() { checkBlank(); },
-  reveal() {
-    state.phase = 'revealed';
-    state.feedback = { kind: 'info', text: '정답을 확인하고 다음 단계로 넘어가요.' };
-    state.proof.push(curStep().proof);
-    renderMission();
-  },
-  next() { goNext(); },
-  compare() {
-    if (!state.essay.trim()) return toast('답을 입력해 주세요');
-    state.phase = 'compare';
-    state.feedback = { kind: 'info', text: '모범 답안과 비교해 보세요. 핵심 근거가 모두 들어 있나요?' };
-    renderMission();
-  },
-  retry() { state.phase = 'answer'; state.feedback = null; renderMission(); focusEssay(); },
-  selfok() {
-    state.phase = 'correct';
-    state.feedback = { kind: 'ok', text: '좋아요! 이 내용이 증명에 들어가요.' };
-    state.proof.push(curStep().proof);
-    renderMission();
-  },
-  model() { // TV 모드 서술형: 모범 답안 바로 공개
-    state.phase = 'correct'; state.feedback = null;
-    state.proof.push(curStep().proof);
-    renderMission();
-  },
-};
-function focusEssay() { const t = document.getElementById('essay'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }
-
-function pickOption(i) {
-  if (state.phase !== 'answer') return;
-  const st = curStep();
-  state.picked = i;
+async function pickOption(st, i) {
+  if (state.busy || state.wrongPicked.has(i)) return;
+  addUser(fmt(st.options[i]));
   if (i === st.answer) {
-    state.phase = 'correct';
-    state.feedback = { kind: 'ok', text: '정답!' };
-    state.proof.push(st.proof);
+    addProof(st.proof); confirmFigure(st);
+    if (!await say({ html: '정답! 👍' + (st.after ? '<br>' + fmt(st.after) : ''), cls: 'ok' })) return;
+    goNext();
   } else {
-    state.wrong++;
-    state.feedback = { kind: 'bad', text: wrongText() };
+    state.wrong++; state.wrongPicked.add(i);
+    const extra = figHintPending(st) ? figHintItems(st) : [];
+    if (!await say(wrongText(st, extra.length > 0), ...extra)) return;
+    dockChoice(st);
   }
-  renderMission();
 }
-function wrongText() {
-  if (isTV()) return '다시 생각해 봐요.';
-  if (state.wrong >= WRONG_LIMIT) return '아직 아니에요. 힌트를 보거나 정답을 보고 넘어갈 수 있어요.';
-  return hasFigHint(curStep()) ? '다시 생각해 봐요. 그림에 힌트를 표시했어요. 더 필요하면 [힌트 더 보기]를 눌러 보세요.'
-                               : '다시 생각해 봐요. 막히면 [힌트]를 눌러 보세요.';
+function wrongText(st, withFig) {
+  if (withFig && !sideFig()) return '음… 다시 생각해 볼까? 🤔 그림에 힌트를 표시했어.';
+  if (isTV()) return '음… 다시 생각해 볼까? 🤔';
+  if (state.wrong >= WRONG_LIMIT) return '아직 아니야. 힌트를 보거나, 정답을 보고 넘어가도 괜찮아.';
+  return '음… 다시 생각해 볼까? 🤔 막히면 힌트를 눌러 봐.';
+}
+
+function dockBlank(st) {
+  const [pre, post] = st.template.split('□');
+  const ex = extraButtons(st);
+  dockEl().innerHTML = `
+    <div class="preview">${fmt(pre)}<span class="box ${state.input ? 'on' : ''}">${fmt(state.input)}<span class="caret"></span></span>${fmt(post || '')}</div>
+    <div class="keys">${['a','b','c','x','y','h','²','×','+','(',')','⌫'].map(k =>
+      `<button class="key ${'abcxyh'.includes(k) ? 'lt' : 'fn'}" data-key="${k}">${k}</button>`).join('')}</div>
+    <div class="btns">${ex}<button class="btn pri" data-send>보내기</button></div>`;
+  dockEl().querySelectorAll('[data-key]').forEach(b => b.onclick = () => pressKey(b.dataset.key));
+  dockEl().querySelector('[data-send]').onclick = () => sendBlank(st);
+  bindExtra(st);
 }
 function pressKey(k) {
-  if (state.phase !== 'answer') return;
+  if (state.busy) return;
   if (k === '⌫') state.input = [...state.input].slice(0, -1).join('');
   else if (state.input.length < 16) state.input += k;
-  if (state.feedback && state.feedback.kind === 'bad') state.feedback = null;
-  // 키패드는 다시 그리지 않고 빈칸만 바꿔 깜박임을 줄인다
-  document.getElementById('stepCard').innerHTML = renderStepBody(curStep());
-  bindStep(curStep());
+  dockBlank(curStep());
 }
-function checkBlank() {
-  if (state.phase !== 'answer') return;
-  const st = curStep();
-  if (!state.input.trim()) return toast('답을 입력해 주세요');
+async function sendBlank(st) {
+  if (state.busy) return;
+  if (!state.input) return say('답을 입력해 줘! ✍️');
+  const filled = st.template.replace('□', state.input);
+  addUser(fmt(filled));
   const r = gradeBlank(state.input, st.answer);
-  if (r === null) {
-    state.feedback = { kind: 'bad', text: '식을 읽을 수 없어요. 괄호나 기호를 확인해 주세요.' };
-  } else if (r) {
-    state.phase = 'correct';
-    state.feedback = { kind: 'ok', text: '정답!' };
-    state.proof.push(st.proof);
-  } else {
-    state.wrong++;
-    state.feedback = { kind: 'bad', text: wrongText() };
+  if (r === null) { // 식으로 읽을 수 없으면 오답으로 세지 않는다
+    if (!await say('식을 읽을 수 없어. 괄호나 기호를 확인해 줘! 🧐')) return;
+    return dockBlank(st);
   }
-  renderMission();
-}
-function goNext() {
-  const M = curMission();
-  if (state.s < M.steps.length - 1) {
-    state.s++; resetStep(); renderMission();
-    // 휴대폰에서 새 단계 카드가 보이도록
-    if (!isTV()) document.getElementById('stepCard').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  if (r) {
+    addProof(st.proof); confirmFigure(st);
+    if (!await say({ html: '정답! 👍' + (st.after ? '<br>' + fmt(st.after) : ''), cls: 'ok' })) return;
+    goNext();
   } else {
-    state.done.add(state.m);
-    showComplete();
+    state.wrong++; state.input = '';
+    const extra = figHintPending(st) ? figHintItems(st) : [];
+    if (!await say(wrongText(st, extra.length > 0), ...extra)) return;
+    dockBlank(st);
   }
 }
 
-/* 물리 키보드(교실 PC·TV 시연용) — 빈칸 단계에서만 */
-document.addEventListener('keydown', e => {
-  if (state.m === null || document.querySelector('.overlay')) return;
-  const st = curStep && state.m !== null ? curStep() : null;
-  if (!st || st.type !== 'blank' || e.target.tagName === 'TEXTAREA') return;
-  if (e.key === 'Enter') { e.preventDefault(); return state.phase === 'answer' ? checkBlank() : goNext(); }
-  if (state.phase !== 'answer') return;
-  const map = { Backspace: '⌫', '^': '²', '2': '²', '*': '×', '+': '+', '(': '(', ')': ')' };
-  let k = map[e.key] || (('abcxyh').includes(e.key.toLowerCase()) && e.key.length === 1 ? e.key.toLowerCase() : null);
-  if (k) { e.preventDefault(); pressKey(k); }
-});
+function dockEssay(st) {
+  if (isTV()) { // TV: 말로 답하고 모범 답안만 공개
+    dockEl().innerHTML = `<div class="btns"><button class="btn pri" data-model>모범 답안 보기</button></div>`;
+    dockEl().querySelector('[data-model]').onclick = async () => {
+      addProof(st.proof); confirmFigure(st);
+      if (!await say(modelBubble(st.model))) return;
+      dockEl().innerHTML = `<div class="btns"><button class="btn pri" data-next>다음 →</button></div>`;
+      dockEl().querySelector('[data-next]').onclick = goNext;
+    };
+    return;
+  }
+  dockEl().innerHTML = `<textarea id="essay" rows="2" placeholder="이유를 써 보세요">${esc(state.essay)}</textarea>
+    <div class="btns"><button class="btn pri" data-send>보내기</button></div>`;
+  wireTextarea();
+  dockEl().querySelector('[data-send]').onclick = async () => {
+    if (state.busy) return;
+    if (!state.essay.trim()) return say('답을 입력해 줘! ✍️');
+    addUser(esc(state.essay));
+    if (!await say('모범 답안이야. 네 답과 비교해 봐! 핵심 근거가 다 들어 있니?', modelBubble(st.model))) return;
+    dockEl().innerHTML = `<div class="btns"><button class="btn" data-retry>다시 쓸게요</button><button class="btn ok" data-ok>맞게 썼어요 →</button></div>`;
+    dockEl().querySelector('[data-retry]').onclick = () => { addUser('다시 쓸게요'); dockEssay(st); };
+    dockEl().querySelector('[data-ok]').onclick = async () => {
+      addUser('맞게 썼어요!'); addProof(st.proof);
+      if (!await say({ html: '좋아! 👏', cls: 'ok' })) return;
+      goNext();
+    };
+  };
+}
+function modelBubble(t) { return { cls: 'model', html: `<div class="k">모범 답안</div>${fmt(t)}` }; }
+function wireTextarea() {
+  const ta = document.getElementById('essay');
+  const grow = () => { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; };
+  ta.oninput = () => { state.essay = ta.value; grow(); };
+  ta.onfocus = () => setTimeout(scrollDown, 300); // 키보드가 올라온 뒤 맨 아래로
+  grow();
+}
+
+async function giveHint(st) {
+  if (state.busy) return;
+  addUser('힌트 줘!');
+  if (figHintPending(st)) { // 그림 힌트부터
+    if (!await say(...figHintItems(st))) return;
+    return showStepDock();
+  }
+  const t = st.hints[state.hint++];
+  if (!await say({ cls: 'hint', html: `<div class="k">💡 힌트 ${state.hint}</div>${fmt(t)}` })) return;
+  showStepDock();
+}
+async function reveal(st) {
+  if (state.busy) return;
+  addUser(isTV() ? '정답 공개!' : '정답 알려줘');
+  const ans = st.type === 'choice' ? st.options[st.answer] : st.template.replace('□', st.answer);
+  addProof(st.proof); confirmFigure(st);
+  if (!await say({ html: `정답은 <b>${fmt(ans)}</b> 이야.` + (st.after ? '<br>' + fmt(st.after) : ''), cls: 'ok' })) return;
+  goNext();
+}
 
 /* ---------- 팝업 ---------- */
 function modal(html, bind) {
   const ov = document.createElement('div');
   ov.className = 'overlay';
   ov.innerHTML = `<div class="modal">${html}</div>`;
+  ov.onclick = e => { if (e.target === ov) ov.remove(); };
   document.body.appendChild(ov);
   bind(ov, () => ov.remove());
 }
-function askLeave() {
-  const started = state.s > 0 || state.phase !== 'answer' || state.input || state.essay;
-  if (!started) return goHome();
-  modal(`<h2>목록으로 나갈까요?</h2><p>진행 중인 풀이가 사라져요. 다시 들어오면 처음부터 시작해요.</p>
-    <div class="row"><button class="btn" data-x>계속 풀기</button><button class="btn primary" data-go>나가기</button></div>`,
-    (ov, close) => { ov.querySelector('[data-x]').onclick = close; ov.querySelector('[data-go]').onclick = () => { close(); goHome(); }; });
+function alertModal(t) {
+  modal(`<p style="margin:4px 0 14px">${esc(t)}</p><div class="btns"><button class="btn pri" data-x>확인</button></div>`,
+    (ov, close) => ov.querySelector('[data-x]').onclick = close);
 }
-function goHome() { state.m = null; renderStart(); }
-
-function showComplete() {
-  const i = state.m, M = MISSIONS[i];
-  // 다음에 풀 수 있는 미완료 미션
-  const next = MISSIONS.findIndex((_, k) => k !== i && !state.done.has(k) && !isLocked(k));
-  const allDone = state.done.size === MISSIONS.length;
-  const lines = state.proof.map(t => `<li>${fmt(t)}</li>`).join('');
-  modal(`<h2>미션 ${i + 1} 완료!</h2>
-    <div class="big">${fmt(M.formula)}</div>
-    <div class="sheet"><ol>${lines}</ol></div>
-    <p class="note">완성된 증명을 공책에 옮겨 적어 보세요.</p>
-    <div class="row">
-      <button class="btn" data-home>목록으로</button>
-      ${allDone ? `<button class="btn primary" data-sum>다섯 공식 모아보기</button>`
-        : next >= 0 ? `<button class="btn primary" data-next>미션 ${next + 1} 시작 →</button>` : ''}
-    </div>`, (ov, close) => {
-      ov.querySelector('[data-home]').onclick = () => { close(); goHome(); };
-      const n = ov.querySelector('[data-next]'); if (n) n.onclick = () => { close(); startMission(next); };
-      const s = ov.querySelector('[data-sum]'); if (s) s.onclick = () => { close(); goHome(); showSummary(); };
-    });
+function askLeave() {
+  if (state.finished) return renderHome();
+  modal(`<h2>목록으로 나갈까요?</h2><p>지금까지의 대화가 사라져요. 다시 들어오면 처음부터 시작해요.</p>
+    <div class="btns"><button class="btn" data-x>계속 풀기</button><button class="btn pri" data-go>나가기</button></div>`,
+    (ov, close) => { ov.querySelector('[data-x]').onclick = close; ov.querySelector('[data-go]').onclick = () => { close(); renderHome(); }; });
 }
 function showSummary() {
-  const rows = MISSIONS.map((m, i) => `<div><span class="f">${fmt(m.formula)}</span><span class="s">미션 ${i + 1}<br>${fmt(m.basis)}</span></div>`).join('');
-  modal(`<h2>직각삼각형 5공식</h2>
-    <p class="note" style="margin:2px 0 0">${fmt('∠A = 90°, AD ⊥ BC일 때')}<br>${fmt('AB = a, AC = b, BC = c, BD = x, CD = y, AD = h')}</p>
-    <div class="sumlist">${rows}</div>
-    <div class="row"><button class="btn primary" data-x>닫기</button></div>`,
-    (ov, close) => { ov.querySelector('[data-x]').onclick = close; });
+  modal(`<h2>📌 정리</h2><div class="sum">${SUMMARY.map(r => `<div><div class="f">${fmt(r.f)}</div><div class="s">${fmt(r.s)}</div></div>`).join('')}</div>
+    ${drawFigure({})}
+    <div class="btns"><button class="btn pri" data-x>닫기</button></div>`,
+    (ov, close) => ov.querySelector('[data-x]').onclick = close);
 }
 
-let toastTimer;
-function toast(t) {
-  document.querySelectorAll('.toast').forEach(e => e.remove());
-  const el = document.createElement('div');
-  el.className = 'toast'; el.textContent = t;
-  document.body.appendChild(el);
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.remove(), 1800);
+/* ---------- 아이폰 키보드 대응 ----------
+   아이폰 사파리는 키보드가 올라와도 화면 높이를 줄이지 않아 입력창이 가려진다.
+   보이는 영역(visualViewport)의 높이에 대화 화면을 맞춘다. */
+function fitViewport() {
+  const vv = window.visualViewport;
+  const h = vv ? vv.height : window.innerHeight;
+  document.documentElement.style.setProperty('--app-h', h + 'px');
+  if (state.m !== null) window.scrollTo(0, 0);
 }
+if (window.visualViewport) {
+  visualViewport.addEventListener('resize', () => { fitViewport(); scrollDown(); });
+  visualViewport.addEventListener('scroll', fitViewport);
+}
+window.addEventListener('resize', fitViewport);
 
-renderStart();
+/* PC 키보드(교실 TV 시연용): 빈칸 단계에서 a b c x y h, 2 또는 ^ → ², * → ×, Backspace, Enter */
+document.addEventListener('keydown', e => {
+  if (state.m === null || !state.steps || state.finished || document.querySelector('.overlay')) return;
+  if (e.target.tagName === 'TEXTAREA') return;
+  const st = curStep(); if (!st || st.type !== 'blank') return;
+  const map = { Backspace: '⌫', '^': '²', '2': '²', '*': '×', '+': '+', '(': '(', ')': ')' };
+  const low = e.key.length === 1 ? e.key.toLowerCase() : '';
+  const k = map[e.key] || ('abcxyh'.includes(low) && low ? low : null);
+  if (k) { e.preventDefault(); pressKey(k); }
+  else if (e.key === 'Enter') { e.preventDefault(); sendBlank(st); }
+});
+
+renderHome();
 </script>
 </body>
 </html>
