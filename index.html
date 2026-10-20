@@ -40,6 +40,7 @@ button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
 /* 문자(a, b, c, x, y, h)는 교과서처럼 기울임 세리프 */
 i.v{font-family:"Times New Roman",Times,serif;font-style:italic;font-size:1.12em;padding:0 .04em}
 sup{font-size:.68em;line-height:0}
+.ol{text-decoration:overline;text-decoration-thickness:1.5px} /* 선분 기호 */
 .hidden{display:none!important}
 
 /* ── 공통 레이아웃 ── */
@@ -84,6 +85,8 @@ sup{font-size:.68em;line-height:0}
 .mbody{max-width:560px;margin:0 auto;padding:10px 16px 24px}
 .figbox{position:sticky;top:61px;z-index:10;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:6px 8px 4px;margin-bottom:12px}
 .figbox svg{display:block;width:100%;height:auto;max-height:30vh}
+.fighint{text-align:center;font-size:13px;font-weight:700;color:#9a6b00;padding-bottom:2px}
+body.tv .fighint{font-size:18px}
 .legend{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;min-height:24px;padding-bottom:2px}
 .chip{font-size:13px;font-weight:700;padding:1px 9px;border-radius:999px;color:#fff}
 
@@ -186,7 +189,9 @@ body.tv .cmp .box{font-size:22px}
        - 'essay'  : 서술형. model(모범 답안)을 보여주고 학생이 스스로 점검합니다.
    · hints : [1차 힌트(방향 제시), 2차 힌트(거의 정답)]
    · proof : 이 단계를 마치면 '증명' 칸에 한 줄로 쌓이는 문장
-   · hl : 그림 강조 — tri(색칠할 삼각형), angles(표시할 각), sides(형광펜 칠할 변)
+   · hl : 그림 힌트 — tri(색칠할 삼각형), angles(표시할 각), sides(형광펜 칠할 변)
+         처음엔 기본 그림만 보이고, 한 번 틀리거나 [힌트]를 누르면 '그림 힌트'로 나타납니다.
+         (힌트 순서: 그림 힌트 → hints의 1차 → 2차)
          sides에 'BC'라고 쓰면 노란 형광펜, 'BC:ABC'라고 쓰면 △ABC 색 형광펜
          각 이름은 가운데 글자가 꼭짓점입니다. 예) 'ABC' = ∠B, 'BAD' = ∠BAD
    ※ 글 속의 소문자 a, b, c, x, y, h는 자동으로 기울임꼴(수학 문자)로 바뀝니다.
@@ -410,6 +415,7 @@ const state = {
   wrong: 0,          // 이 단계에서 틀린 횟수
   hint: 0,           // 펼친 힌트 수
   picked: null,      // 선택형: 마지막으로 고른 보기
+  figHint: false,    // 그림 힌트(강조)를 펼쳤는지
   feedback: null,    // {kind, text}
   proof: [],         // 쌓인 증명 줄
 };
@@ -421,7 +427,16 @@ const app = document.getElementById('app');
    한 글자씩 처리하는 이유: HTML 특수문자(&amp; 등)의 영문자를 잘못 바꾸지 않기 위해 */
 function fmt(t) {
   let o = '';
-  for (const ch of String(t)) {
+  // ' : '가 줄 끝에서 끊기지 않게 붙는 공백으로
+  const s = [...String(t).replace(/ : /g, '\u00a0:\u00a0')];
+  for (let i = 0; i < s.length; i++) {
+    const ch = s[i];
+    // 두 글자 선분 이름(AB, BD …)에는 선분 기호(윗줄)를 붙인다.
+    // △ABC·∠BAC처럼 더 긴 이름이나 'AA 닮음'의 AA는 건드리지 않는다.
+    const pair = ch + (s[i + 1] || '');
+    if (/^[A-D]{2}$/.test(pair) && pair !== 'AA' && !/[A-Z]/.test(s[i + 2] || '') && !/[A-Z△∠]/.test(s[i - 1] || '')) {
+      o += `<span class="ol">${pair}</span>`; i++; continue;
+    }
     if ('abcxyh'.includes(ch)) o += `<i class="v">${ch}</i>`;
     else if (ch === '²') o += '<sup>2</sup>';
     else if (ch === '<') o += '&lt;';
@@ -576,12 +591,12 @@ function renderStart() {
   const allDone = state.done.size === MISSIONS.length;
   app.innerHTML = `<div class="wrap">
     <h1 class="title">직각삼각형 5공식</h1>
-    <p class="subtitle">∠A = 90°인 직각삼각형 ABC에서 꼭짓점 A에서 빗변 BC에 내린 수선의 발을 D라고 할 때</p>
+    <p class="subtitle">${fmt('∠A = 90°인 직각삼각형 ABC에서 꼭짓점 A에서 빗변 BC에 내린 수선의 발을 D라고 할 때')}</p>
     <div class="card">
       <div class="figbox" style="position:static;border:0;padding:0;margin:0">${drawFigure({})}</div>
       <div class="defs">
-        <span>AB = ${fmt('a')}</span><span>AC = ${fmt('b')}</span><span>BC = ${fmt('c')}</span>
-        <span>BD = ${fmt('x')}</span><span>CD = ${fmt('y')}</span><span>AD = ${fmt('h')}</span>
+        <span>${fmt('AB = a')}</span><span>${fmt('AC = b')}</span><span>${fmt('BC = c')}</span>
+        <span>${fmt('BD = x')}</span><span>${fmt('CD = y')}</span><span>${fmt('AD = h')}</span>
       </div>
     </div>
     <div class="seg" role="tablist">
@@ -615,7 +630,7 @@ function startMission(i) {
 }
 function resetStep() {
   state.phase = 'answer'; state.input = ''; state.essay = '';
-  state.wrong = 0; state.hint = 0; state.picked = null; state.feedback = null;
+  state.wrong = 0; state.hint = 0; state.picked = null; state.feedback = null; state.figHint = false;
 }
 const curMission = () => MISSIONS[state.m];
 const curStep = () => curMission().steps[state.s];
@@ -634,7 +649,7 @@ function renderMission() {
     <div class="prog">${state.s + 1}/${n}</div>
   </div><div class="pbar"><div style="width:${(state.s / n) * 100}%"></div></div></div>
   <div class="mbody">
-    <div class="figbox">${drawFigure(st.hl)}</div>
+    <div class="figbox">${drawFigure(figHintShown(st) ? st.hl : {})}${figHintShown(st) && state.phase === 'answer' ? '<div class="fighint">💡 그림 힌트</div>' : ''}</div>
     <div class="panel">
       <div class="card" id="stepCard">${renderStepBody(st)}</div>
       ${showKeypad ? renderKeypad() : ''}
@@ -644,6 +659,11 @@ function renderMission() {
   bindStep(st);
   document.getElementById('backBtn').onclick = askLeave;
 }
+
+/* 그림 강조(색칠한 삼각형·각·변)는 답을 알려주는 셈이라, 처음엔 기본 그림만 보여준다.
+   한 번 틀리거나 [힌트]를 누르면 '그림 힌트'로 강조가 나타나고, 정답을 맞힌 뒤에도 확인용으로 보인다. */
+function hasFigHint(st) { const h = st.hl || {}; return ['tri','angles','sides'].some(k => (h[k] || []).length); }
+function figHintShown(st) { return hasFigHint(st) && (state.figHint || state.wrong > 0 || state.phase !== 'answer'); }
 
 function renderStepBody(st) {
   let h = `<div class="stephead">${state.s + 1}단계 · ${{choice:'고르기', blank:'빈칸 채우기', essay:'서술하기'}[st.type]}</div>`;
@@ -685,10 +705,11 @@ function renderStepBody(st) {
 
   if (state.feedback) h += `<div class="fb ${state.feedback.kind}">${fmt(state.feedback.text)}</div>`;
 
-  if (st.hints && state.hint > 0) {
-    h += `<div class="hints">` + st.hints.slice(0, state.hint)
-      .map((t, i) => `<div class="hint"><b>힌트 ${i + 1}</b> · ${fmt(t)}</div>`).join('') + `</div>`;
-  }
+  // 힌트 순서: 그림 힌트 → 글 힌트 1 → 글 힌트 2
+  const hintItems = [];
+  if (state.phase === 'answer' && figHintShown(st)) hintItems.push('<b>그림 힌트</b> · 위 그림에 강조 표시를 했어요.');
+  if (st.hints) st.hints.slice(0, state.hint).forEach((t, i) => hintItems.push(`<b>힌트 ${i + 1}</b> · ${fmt(t)}`));
+  if (hintItems.length) h += `<div class="hints">` + hintItems.map(x => `<div class="hint">${x}</div>`).join('') + `</div>`;
 
   h += `<div class="actions row">${renderButtons(st)}</div>`;
   return h;
@@ -710,8 +731,10 @@ function renderButtons(st) {
   }
   // 선택형·빈칸형
   let b = '';
-  const hasMoreHint = st.hints && state.hint < st.hints.length;
-  if (hasMoreHint) b += `<button class="btn ghost" data-act="hint">힌트${state.hint ? ' 더 보기' : ''}</button>`;
+  const figPending = hasFigHint(st) && !figHintShown(st);
+  const hasMoreHint = figPending || (st.hints && state.hint < st.hints.length);
+  const anyShown = figHintShown(st) || state.hint > 0;
+  if (hasMoreHint) b += `<button class="btn ghost" data-act="hint">힌트${anyShown ? ' 더 보기' : ''}</button>`;
   if (st.type === 'blank') b += `<button class="btn primary" data-act="check">확인</button>`;
   if (isTV()) b += `<button class="btn" data-act="reveal">정답 공개</button>`;
   else if (state.wrong >= WRONG_LIMIT) b += `<button class="btn" data-act="reveal">정답 보고 넘어가기</button>`;
@@ -743,7 +766,11 @@ function bindStep(st) {
 }
 
 const ACT = {
-  hint() { state.hint++; renderMission(); },
+  hint() { // 그림 힌트를 아직 안 봤으면 그림부터, 그다음 글 힌트
+    const st = curStep();
+    if (hasFigHint(st) && !figHintShown(st)) state.figHint = true; else state.hint++;
+    renderMission();
+  },
   check() { checkBlank(); },
   reveal() {
     state.phase = 'revealed';
@@ -789,8 +816,9 @@ function pickOption(i) {
 }
 function wrongText() {
   if (isTV()) return '다시 생각해 봐요.';
-  return state.wrong >= WRONG_LIMIT ? '아직 아니에요. 힌트를 보거나 정답을 보고 넘어갈 수 있어요.'
-                                    : '다시 생각해 봐요. 막히면 [힌트]를 눌러 보세요.';
+  if (state.wrong >= WRONG_LIMIT) return '아직 아니에요. 힌트를 보거나 정답을 보고 넘어갈 수 있어요.';
+  return hasFigHint(curStep()) ? '다시 생각해 봐요. 그림에 힌트를 표시했어요. 더 필요하면 [힌트 더 보기]를 눌러 보세요.'
+                               : '다시 생각해 봐요. 막히면 [힌트]를 눌러 보세요.';
 }
 function pressKey(k) {
   if (state.phase !== 'answer') return;
@@ -882,7 +910,7 @@ function showComplete() {
 function showSummary() {
   const rows = MISSIONS.map((m, i) => `<div><span class="f">${fmt(m.formula)}</span><span class="s">미션 ${i + 1}<br>${fmt(m.basis)}</span></div>`).join('');
   modal(`<h2>직각삼각형 5공식</h2>
-    <p class="note" style="margin:2px 0 0">∠A = 90°, AD ⊥ BC일 때<br>AB = ${fmt('a')}, AC = ${fmt('b')}, BC = ${fmt('c')}, BD = ${fmt('x')}, CD = ${fmt('y')}, AD = ${fmt('h')}</p>
+    <p class="note" style="margin:2px 0 0">${fmt('∠A = 90°, AD ⊥ BC일 때')}<br>${fmt('AB = a, AC = b, BC = c, BD = x, CD = y, AD = h')}</p>
     <div class="sumlist">${rows}</div>
     <div class="row"><button class="btn primary" data-x>닫기</button></div>`,
     (ov, close) => { ov.querySelector('[data-x]').onclick = close; });
