@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>직각삼각형 5공식</title>
+<style>
+/* ───────────────────────────────────────────────
+   색·글꼴 — 바꾸고 싶으면 이 :root 값만 고치면 됩니다.
+   (삼각형 색은 아래 <script>의 설정 영역 COLORS에서 바꿉니다)
+   ─────────────────────────────────────────────── */
+:root{
+  --paper:#fbfaf6;      /* 노트 종이 배경 */
+  --ink:#1f2328;        /* 기본 글씨 */
+  --muted:#6b7280;      /* 보조 글씨 */
+  --line:#e6e2d6;       /* 구분선·테두리 */
+  --rule:#eef1f6;       /* 노트 줄 */
+  --card:#ffffff;
+  --accent:#1f4fd1;     /* 버튼 강조 */
+  --ok:#15803d;
+  --ok-bg:#e8f6ec;
+  --bad:#c2410c;
+  --bad-bg:#fdf0e8;
+  --marker:#ffd84d;     /* 형광펜(변 강조) */
+  --angle:#e11d48;      /* 각 강조 */
+  --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--paper);
+  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;
+  font-size:17px;line-height:1.55;
+  -webkit-text-size-adjust:100%;
+  touch-action:manipulation; /* 더블탭 확대 방지 */
+}
+button{font:inherit;color:inherit;cursor:pointer;touch-action:manipulation}
+/* 문자(a, b, c, x, y, h)는 교과서처럼 기울임 세리프 */
+i.v{font-family:"Times New Roman",Times,serif;font-style:italic;font-size:1.12em;padding:0 .04em}
+sup{font-size:.68em;line-height:0}
+.hidden{display:none!important}
+
+/* ── 공통 레이아웃 ── */
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 16px;font-weight:600;min-height:48px}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.ghost{background:transparent}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>.btn{flex:1}
+
+/* ── 시작 화면 ── */
+.title{font-size:28px;font-weight:800;letter-spacing:-.02em;margin:8px 0 2px}
+.subtitle{color:var(--muted);margin:0 0 14px;font-size:15px}
+.seg{display:flex;background:#eef0f4;border-radius:12px;padding:4px;margin:14px 0}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:10px;font-weight:600;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.defs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 10px;font-size:15px;margin-top:6px}
+.mlist{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.mitem{display:flex;align-items:center;gap:12px;text-align:left;width:100%;border:1px solid var(--line);background:#fff;border-radius:var(--radius);padding:14px}
+.mnum{flex:none;width:34px;height:34px;border-radius:50%;background:#eef2ff;color:var(--accent);display:grid;place-items:center;font-weight:800}
+.mitem .f{font-size:20px;font-weight:700}
+.mitem .s{font-size:13px;color:var(--muted)}
+.mitem .st{margin-left:auto;font-weight:700;font-size:14px;white-space:nowrap}
+.mitem.done{border-color:#b7e2c4;background:#f6fcf8}
+.mitem.done .mnum{background:var(--ok);color:#fff}
+.mitem.done .st{color:var(--ok)}
+.mitem.locked{opacity:.55}
+
+/* ── 미션 화면 ── */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(251,250,246,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+.topbar .in{max-width:560px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 12px}
+.back{border:0;background:transparent;font-size:22px;width:44px;height:44px;border-radius:10px}
+.topbar .t{font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog{font-size:14px;color:var(--muted);font-weight:600}
+.pbar{height:4px;background:var(--line)}
+.pbar>div{height:100%;background:var(--accent);transition:width .3s}
+
+.mbody{max-width:560px;margin:0 auto;padding:10px 16px 24px}
+.figbox{position:sticky;top:61px;z-index:10;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:6px 8px 4px;margin-bottom:12px}
+.figbox svg{display:block;width:100%;height:auto;max-height:30vh}
+.legend{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;min-height:24px;padding-bottom:2px}
+.chip{font-size:13px;font-weight:700;padding:1px 9px;border-radius:999px;color:#fff}
+
+.stephead{font-size:13px;font-weight:700;color:var(--accent);margin-bottom:4px}
+.q{font-size:18px;font-weight:600;margin:0 0 12px}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;font-size:18px;min-height:52px}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg);animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+.tmpl{font-size:24px;text-align:center;margin:6px 0 14px;line-height:1.8}
+.blank{display:inline-block;min-width:64px;padding:0 10px;border:2px dashed var(--accent);border-radius:10px;background:#f4f7ff;min-height:1.6em;vertical-align:middle;line-height:1.5}
+.blank.filled{border-style:solid}
+.blank.right{border-color:var(--ok);background:var(--ok-bg)}
+.blank.wrong{border-color:var(--bad);background:var(--bad-bg);animation:shake .3s}
+.caret{display:inline-block;width:2px;height:1.1em;background:var(--accent);vertical-align:-.15em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+textarea{width:100%;min-height:96px;border:1.5px solid var(--line);border-radius:12px;padding:12px;font:inherit;font-size:16px;resize:vertical;background:#fff}
+.cmp{display:grid;grid-template-columns:1fr;gap:8px;margin:4px 0 12px}
+.cmp .box{border-radius:12px;padding:10px 12px;font-size:16px}
+.cmp .mine{background:#f3f4f6;white-space:pre-wrap}
+.cmp .model{background:#eef6ff;border:1px solid #cfe0fb}
+.cmp .lab{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:2px}
+
+.fb{margin:12px 0 0;padding:10px 12px;border-radius:12px;font-weight:600;font-size:16px}
+.fb.ok{background:var(--ok-bg);color:var(--ok)}
+.fb.bad{background:var(--bad-bg);color:var(--bad)}
+.fb.info{background:#eef2ff;color:var(--accent)}
+.hints{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+.hint{background:#fff8e1;border:1px solid #f4dd8e;border-radius:12px;padding:9px 12px;font-size:15px}
+.hint b{color:#9a6b00}
+.actions{margin-top:14px}
+
+.proof{margin-top:12px}
+.proof summary{cursor:pointer;font-weight:700;color:var(--muted);font-size:14px;padding:4px 0}
+.proof ol{margin:6px 0 0;padding-left:26px;font-size:16px}
+.proof li{padding:2px 0}
+.proof li.now{color:var(--muted)}
+
+/* ── 화면 키패드(빈칸 단계에서만). 휴대폰 키보드가 그림을 가리지 않도록 직접 만든 키패드 ── */
+.keypad{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#e9ebf0;border-top:1px solid #d5d8df;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+.keypad .grid{max-width:560px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+.key{border:0;background:#fff;border-radius:10px;height:48px;font-size:22px;box-shadow:0 1px 0 #c5c8cf}
+.key.fn{background:#d9dce3;font-size:22px;font-weight:600}
+body.haskp .mbody{padding-bottom:150px}
+
+/* ── 팝업 ── */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(20,24,32,.45);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:var(--paper);border-radius:18px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.modal h2{margin:0 0 4px;font-size:22px}
+.modal .big{font-size:30px;font-weight:800;text-align:center;margin:10px 0 14px}
+.sheet{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background-image:repeating-linear-gradient(to bottom,transparent 0 33px,var(--rule) 33px 34px)}
+.sheet ol{margin:0;padding-left:24px;font-size:17px;line-height:34px}
+.note{font-size:13px;color:var(--muted);margin:8px 0 14px}
+.sumlist{display:flex;flex-direction:column;gap:8px;margin:10px 0 14px}
+.sumlist div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.sumlist .f{font-size:22px;font-weight:800}
+.sumlist .s{font-size:13px;color:var(--muted);text-align:right}
+.toast{position:fixed;left:50%;bottom:170px;transform:translateX(-50%);background:#1f2328;color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;z-index:60;max-width:90vw;text-align:center}
+
+/* ── TV 시연 모드: 가로 큰 화면, 그림 왼쪽 / 문제 오른쪽 ── */
+body.tv{font-size:22px}
+body.tv .wrap{max-width:900px}
+body.tv .topbar .in,body.tv .mbody{max-width:1500px}
+body.tv .mbody{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:start;padding:20px 28px}
+body.tv .figbox{position:sticky;top:80px;margin:0}
+body.tv .figbox svg{max-height:70vh}
+body.tv .chip{font-size:18px}
+body.tv .q{font-size:28px}
+body.tv .opt{font-size:26px;padding:14px 18px}
+body.tv .tmpl{font-size:38px}
+body.tv .fb,body.tv .hint{font-size:22px}
+body.tv .proof ol{font-size:22px}
+body.tv .proof summary,body.tv .stephead{font-size:18px}
+body.tv .topbar .t{font-size:24px}
+body.tv .keypad{position:static;background:transparent;border:0;padding:0;margin-top:14px}
+body.tv .keypad .key{height:60px;font-size:30px}
+body.tv .keypad .key.fn{font-size:26px}
+body.tv .prog{font-size:20px}
+body.tv .back{font-size:30px;width:56px;height:56px}
+body.tv.haskp .mbody{padding-bottom:24px}
+body.tv .cmp .box{font-size:22px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* =====================================================================
+   설정 영역 — 선생님이 직접 고치는 곳
+   ---------------------------------------------------------------------
+   · COLORS : 삼각형 색
+   · MISSIONS : 미션별 단계. 각 단계의 type은 세 가지입니다.
+       - 'choice' : 선택형. options(보기)와 answer(정답 보기의 번호, 0부터 셈)
+       - 'blank'  : 빈칸형. template의 □ 자리에 들어갈 답을 answer에 적습니다.
+                    cx와 xc, c×x처럼 같은 식은 자동으로 모두 정답 처리됩니다.
+                    (입력에 쓸 수 있는 기호: a b c x y h ² × + ( ) )
+       - 'essay'  : 서술형. model(모범 답안)을 보여주고 학생이 스스로 점검합니다.
+   · hints : [1차 힌트(방향 제시), 2차 힌트(거의 정답)]
+   · proof : 이 단계를 마치면 '증명' 칸에 한 줄로 쌓이는 문장
+   · hl : 그림 강조 — tri(색칠할 삼각형), angles(표시할 각), sides(형광펜 칠할 변)
+         sides에 'BC'라고 쓰면 노란 형광펜, 'BC:ABC'라고 쓰면 △ABC 색 형광펜
+         각 이름은 가운데 글자가 꼭짓점입니다. 예) 'ABC' = ∠B, 'BAD' = ∠BAD
+   ※ 글 속의 소문자 a, b, c, x, y, h는 자동으로 기울임꼴(수학 문자)로 바뀝니다.
+   ===================================================================== */
+const COLORS = {
+  ABC: '#2563eb', // 파랑
+  DBA: '#ea7a17', // 주황
+  DAC: '#16a34a', // 초록
+};
+
+const MISSIONS = [
+  { // ───────────── 미션 1 ─────────────
+    formula: 'a² = cx', basis: '△ABC ∽ △DBA',
+    steps: [
+      { type:'choice', hl:{tri:['ABC','DBA']},
+        q:'△ABC와 닮은 작은 삼각형 중 꼭짓점 B를 함께 가진 것은? (대응하는 꼭짓점 순서대로)',
+        options:['△DBA','△BDA','△ABD','△DAC'], answer:0,
+        hints:['△ABC의 꼭짓점 A, B, C에 각각 어느 꼭짓점이 대응하는지 생각해 보세요.',
+               'A(직각) ↔ D(직각), B ↔ B, C ↔ A 순서로 써요.'],
+        proof:'△ABC와 △DBA에서' },
+      { type:'choice', hl:{tri:['ABC','DBA'],angles:['ABC']},
+        q:'두 삼각형에서 공통인 각은?',
+        options:['∠A','∠B','∠C'], answer:1,
+        hints:['두 삼각형이 함께 가진 꼭짓점을 찾아보세요.',
+               '꼭짓점 B의 각은 두 삼각형 모두에 들어 있어요.'],
+        proof:'∠B는 공통' },
+      { type:'choice', hl:{tri:['ABC','DBA'],angles:['BAC','BDA']},
+        q:'크기가 같은 직각의 짝은?',
+        options:['∠BAC = ∠BDA = 90°','∠BAD = ∠BDA = 90°','∠ABD = ∠BAC = 90°'], answer:0,
+        hints:['그림에서 직각 표시가 있는 곳을 찾아보세요.',
+               '△ABC의 직각은 ∠BAC, △DBA의 직각은 ∠BDA예요.'],
+        proof:'∠BAC = ∠BDA = 90°' },
+      { type:'essay', hl:{tri:['ABC','DBA'],angles:['ABC','BAC','BDA']},
+        q:'△ABC와 △DBA가 닮은 이유를 닮음 조건과 함께 써 보세요.',
+        model:'∠B는 공통이고, ∠BAC = ∠BDA = 90°이므로 두 쌍의 대응각의 크기가 각각 같다. 따라서 △ABC ∽ △DBA (AA 닮음)',
+        proof:'∴ △ABC ∽ △DBA (AA 닮음)' },
+      { type:'blank', hl:{tri:['ABC','DBA'],sides:['BC:ABC','AB:ABC','AB:DBA','BD:DBA']},
+        q:'닮은 도형에서 대응변의 길이의 비는 같아요. 빈칸을 채우세요.',
+        template:'c : a = a : □', answer:'x',
+        hints:['△ABC의 BC(=c)에 대응하는 변은 △DBA의 BA(=a)예요. 그럼 △ABC의 AB(=a)에 대응하는 변은?',
+               'AB에 대응하는 변은 DB이고, 그 길이는 x예요.'],
+        proof:'BC : BA = BA : BD 이므로 c : a = a : x' },
+      { type:'blank', hl:{tri:['ABC','DBA']},
+        q:'비례식을 정리하세요. (외항의 곱 = 내항의 곱)',
+        template:'a² = □', answer:'cx',
+        hints:['c : a = a : x 에서 바깥쪽 두 항(외항)을 곱해 보세요.',
+               '외항의 곱은 c × x 예요.'],
+        proof:'∴ a² = cx' },
+    ]
+  },
+  { // ───────────── 미션 2 ─────────────
+    formula: 'b² = cy', basis: '△ABC ∽ △DAC',
+    steps: [
+      { type:'choice', hl:{tri:['ABC','DAC']},
+        q:'△ABC와 닮은 작은 삼각형 중 꼭짓점 C를 함께 가진 것은? (대응하는 꼭짓점 순서대로)',
+        options:['△DAC','△ADC','△CDA','△DBA'], answer:0,
+        hints:['△ABC의 꼭짓점 A, B, C에 각각 어느 꼭짓점이 대응하는지 생각해 보세요.',
+               'A(직각) ↔ D(직각), B ↔ A, C ↔ C 순서로 써요.'],
+        proof:'△ABC와 △DAC에서' },
+      { type:'choice', hl:{tri:['ABC','DAC'],angles:['ACB']},
+        q:'두 삼각형에서 공통인 각은?',
+        options:['∠A','∠B','∠C'], answer:2,
+        hints:['두 삼각형이 함께 가진 꼭짓점을 찾아보세요.',
+               '꼭짓점 C의 각은 두 삼각형 모두에 들어 있어요.'],
+        proof:'∠C는 공통' },
+      { type:'choice', hl:{tri:['ABC','DAC'],angles:['BAC','ADC']},
+        q:'크기가 같은 직각의 짝은?',
+        options:['∠DAC = ∠ADC = 90°','∠BAC = ∠ADC = 90°','∠ACD = ∠BAC = 90°'], answer:1,
+        hints:['그림에서 직각 표시가 있는 곳을 찾아보세요.',
+               '△ABC의 직각은 ∠BAC, △DAC의 직각은 ∠ADC예요.'],
+        proof:'∠BAC = ∠ADC = 90°' },
+      { type:'essay', hl:{tri:['ABC','DAC'],angles:['ACB','BAC','ADC']},
+        q:'△ABC와 △DAC가 닮은 이유를 닮음 조건과 함께 써 보세요.',
+        model:'∠C는 공통이고, ∠BAC = ∠ADC = 90°이므로 두 쌍의 대응각의 크기가 각각 같다. 따라서 △ABC ∽ △DAC (AA 닮음)',
+        proof:'∴ △ABC ∽ △DAC (AA 닮음)' },
+      { type:'blank', hl:{tri:['ABC','DAC'],sides:['BC:ABC','AC:ABC','AC:DAC','CD:DAC']},
+        q:'대응변의 길이의 비가 같음을 이용해 빈칸을 채우세요.',
+        template:'c : b = b : □', answer:'y',
+        hints:['△ABC의 BC(=c)에 대응하는 변은 △DAC의 AC(=b)예요. 그럼 △ABC의 AC(=b)에 대응하는 변은?',
+               'AC에 대응하는 변은 DC이고, 그 길이는 y예요.'],
+        proof:'BC : AC = AC : DC 이므로 c : b = b : y' },
+      { type:'blank', hl:{tri:['ABC','DAC']},
+        q:'비례식을 정리하세요. (외항의 곱 = 내항의 곱)',
+        template:'b² = □', answer:'cy',
+        hints:['c : b = b : y 에서 바깥쪽 두 항(외항)을 곱해 보세요.',
+               '외항의 곱은 c × y 예요.'],
+        proof:'∴ b² = cy' },
+    ]
+  },
+  { // ───────────── 미션 3 ─────────────
+    formula: 'h² = xy', basis: '△DBA ∽ △DAC',
+    steps: [
+      { type:'choice', hl:{tri:['DBA','DAC'],angles:['BDA','ADC']},
+        q:'△DBA와 △DAC에서 크기가 같은 직각의 짝은?',
+        options:['∠BAD = ∠DAC = 90°','∠BDA = ∠ADC = 90°','∠BAC = ∠ADC = 90°'], answer:1,
+        hints:['두 작은 삼각형은 선분 AD를 함께 가지고 있어요. AD는 BC에 내린 수선이에요.',
+               '수선의 발 D에서 생기는 두 각이에요.'],
+        proof:'△DBA와 △DAC에서 ∠BDA = ∠ADC = 90°' },
+      { type:'choice', hl:{tri:['DBA','DAC'],angles:['BAD']},
+        q:'∠BAD와 크기가 같은 각은?',
+        options:['∠B','∠C','∠DAC'], answer:1,
+        hints:['△DBA에서 ∠B + ∠BAD = 90°예요. △ABC에서는 ∠B + ? = 90°일까요?',
+               '△ABC에서 ∠B + ∠C = 90°예요.'],
+        proof:'∠BAD = ∠C' },
+      { type:'essay', hl:{tri:['ABC','DBA'],angles:['ABC','BAD','ACB']},
+        q:'∠BAD = ∠C인 이유를 써 보세요.',
+        model:'△DBA에서 ∠B + ∠BAD = 90°이고, △ABC에서 ∠B + ∠C = 90°이다. 따라서 ∠BAD = 90° − ∠B = ∠C',
+        proof:'(∵ ∠B + ∠BAD = 90°, ∠B + ∠C = 90°)' },
+      { type:'choice', hl:{tri:['DBA','DAC'],angles:['BDA','ADC','BAD','ACB']},
+        q:'두 삼각형의 닮음을 대응 순서에 맞게 바르게 쓴 것은?',
+        options:['△DBA ∽ △DCA (AA 닮음)','△DBA ∽ △ADC (AA 닮음)','△DBA ∽ △DAC (AA 닮음)'], answer:2,
+        hints:['직각끼리(D ↔ D), ∠BAD와 ∠C가 대응해요. 남은 B는 어디에 대응할까요?',
+               'D ↔ D, B ↔ A, A ↔ C 순서예요.'],
+        proof:'∴ △DBA ∽ △DAC (AA 닮음)' },
+      { type:'blank', hl:{tri:['DBA','DAC'],sides:['BD:DBA','AD:DBA','AD:DAC','CD:DAC']},
+        q:'대응변의 길이의 비가 같음을 이용해 빈칸을 채우세요.',
+        template:'x : h = h : □', answer:'y',
+        hints:['△DBA의 DB(=x)에 대응하는 변은 △DAC의 DA(=h)예요. 그럼 △DBA의 DA(=h)에 대응하는 변은?',
+               'DA에 대응하는 변은 DC이고, 그 길이는 y예요.'],
+        proof:'BD : AD = AD : CD 이므로 x : h = h : y' },
+      { type:'blank', hl:{tri:['DBA','DAC']},
+        q:'비례식을 정리하세요. (외항의 곱 = 내항의 곱)',
+        template:'h² = □', answer:'xy',
+        hints:['x : h = h : y 에서 바깥쪽 두 항(외항)을 곱해 보세요.',
+               '외항의 곱은 x × y 예요.'],
+        proof:'∴ h² = xy' },
+    ]
+  },
+  { // ───────────── 미션 4 ─────────────
+    formula: 'ab = ch', basis: '△ABC의 넓이',
+    steps: [
+      { type:'choice', hl:{tri:['ABC'],sides:['AB','AC']},
+        q:'AB를 밑변으로 할 때, △ABC의 높이가 되는 선분은?',
+        options:['AC (길이 b)','AD (길이 h)','BC (길이 c)'], answer:0,
+        hints:['높이는 밑변에 수직인 선분이에요.',
+               '∠A = 90°이므로 AC ⊥ AB예요.'],
+        proof:'AB를 밑변으로 하면 높이는 AC' },
+      { type:'blank', hl:{tri:['ABC'],sides:['AB','AC']},
+        q:'△ABC의 넓이를 a, b로 나타내세요.',
+        template:'(△ABC의 넓이) = ½ × a × □', answer:'b',
+        hints:['삼각형의 넓이 = ½ × (밑변) × (높이)',
+               '밑변 AB = a, 높이 AC = ?'],
+        proof:'(△ABC의 넓이) = ½ × a × b' },
+      { type:'choice', hl:{tri:['ABC'],sides:['BC','AD']},
+        q:'BC를 밑변으로 할 때, △ABC의 높이가 되는 선분은?',
+        options:['AB (길이 a)','AD (길이 h)','AC (길이 b)'], answer:1,
+        hints:['꼭짓점 A에서 BC에 수직으로 내린 선분을 찾아보세요.',
+               'AD ⊥ BC예요.'],
+        proof:'BC를 밑변으로 하면 높이는 AD' },
+      { type:'blank', hl:{tri:['ABC'],sides:['BC','AD']},
+        q:'△ABC의 넓이를 c, h로 나타내세요.',
+        template:'(△ABC의 넓이) = ½ × c × □', answer:'h',
+        hints:['삼각형의 넓이 = ½ × (밑변) × (높이)',
+               '밑변 BC = c, 높이 AD = ?'],
+        proof:'(△ABC의 넓이) = ½ × c × h' },
+      { type:'essay', hl:{tri:['ABC']},
+        q:'두 식이 같은 이유와, 여기서 얻을 수 있는 결론을 써 보세요.',
+        model:'두 식은 모두 같은 삼각형 ABC의 넓이이므로 ½ab = ½ch이다. 양변에 2를 곱하면 ab = ch',
+        proof:'같은 삼각형의 넓이이므로 ½ab = ½ch' },
+      { type:'blank', hl:{tri:['ABC'],sides:['AB','AC','BC','AD']},
+        q:'식을 정리하세요.',
+        template:'ab = □', answer:'ch',
+        hints:['½ab = ½ch 의 양변에 2를 곱해 보세요.',
+               '오른쪽은 c × h가 남아요.'],
+        proof:'∴ ab = ch' },
+    ]
+  },
+  { // ───────────── 미션 5 ─────────────
+    formula: 'a² + b² = c²', basis: '미션 1 + 미션 2',
+    needs: [0, 1], // 미션 1, 2를 끝내야 열립니다 (0부터 셈)
+    steps: [
+      { type:'blank', hl:{tri:['ABC','DBA']},
+        q:'미션 1에서 증명한 식을 떠올려 보세요.',
+        template:'a² = □', answer:'cx',
+        hints:['△ABC ∽ △DBA에서 얻은 식이에요.', 'a² = c × ?'],
+        proof:'미션 1에서 a² = cx' },
+      { type:'blank', hl:{tri:['ABC','DAC']},
+        q:'미션 2에서 증명한 식을 떠올려 보세요.',
+        template:'b² = □', answer:'cy',
+        hints:['△ABC ∽ △DAC에서 얻은 식이에요.', 'b² = c × ?'],
+        proof:'미션 2에서 b² = cy' },
+      { type:'blank', hl:{tri:['ABC']},
+        q:'두 식을 변끼리 더하세요.',
+        template:'a² + b² = cx + □', answer:'cy',
+        hints:['왼쪽끼리, 오른쪽끼리 더해요.', 'b²에 해당하는 오른쪽 식을 쓰면 돼요.'],
+        proof:'두 식을 더하면 a² + b² = cx + cy' },
+      { type:'blank', hl:{tri:['ABC']},
+        q:'공통인 c로 묶으세요.',
+        template:'a² + b² = c(□ + y)', answer:'x',
+        hints:['cx + cy = c × ( ? + y )', '분배법칙을 거꾸로 써요.'],
+        proof:'= c(x + y)' },
+      { type:'essay', hl:{tri:['ABC'],sides:['BD:DBA','CD:DAC']},
+        q:'x + y는 무엇과 같은지, 그 이유와 함께 써 보세요.',
+        model:'점 D는 변 BC 위에 있으므로 BD + DC = BC이다. 즉 x + y = c',
+        proof:'점 D는 BC 위에 있으므로 x + y = c' },
+      { type:'blank', hl:{tri:['ABC'],sides:['AB','AC','BC']},
+        q:'결론을 쓰세요.',
+        template:'a² + b² = □', answer:'c²',
+        hints:['c(x + y)에서 x + y = c를 넣어 보세요.', 'c × c = ?'],
+        proof:'∴ a² + b² = c²' },
+    ]
+  },
+];
+
+/* 몇 번 틀리면 [정답 보고 넘어가기]가 나올지 */
+const WRONG_LIMIT = 2;
+
+/* ===================== 설정 영역 끝 ===================== */
+
+
+/* ---------- 상태 ----------
+   저장하지 않는 앱이라 모든 것이 이 객체에만 있습니다(새로고침하면 초기화). */
+const state = {
+  mode: 'solo',      // 'solo' 개인 풀이 | 'tv' TV 시연
+  done: new Set(),   // 완료한 미션 번호
+  m: null,           // 지금 미션 번호
+  s: 0,              // 지금 단계 번호
+  phase: 'answer',   // 'answer' 푸는 중 | 'correct' 맞힘 | 'revealed' 정답 봄 | 'compare' 서술 비교 중
+  input: '',         // 빈칸 입력 내용
+  essay: '',         // 서술 입력 내용
+  wrong: 0,          // 이 단계에서 틀린 횟수
+  hint: 0,           // 펼친 힌트 수
+  picked: null,      // 선택형: 마지막으로 고른 보기
+  feedback: null,    // {kind, text}
+  proof: [],         // 쌓인 증명 줄
+};
+
+const app = document.getElementById('app');
+
+/* ---------- 글자 표시 ----------
+   소문자 a,b,c,x,y,h → 기울임 수학 문자, ² → 위 첨자.
+   한 글자씩 처리하는 이유: HTML 특수문자(&amp; 등)의 영문자를 잘못 바꾸지 않기 위해 */
+function fmt(t) {
+  let o = '';
+  for (const ch of String(t)) {
+    if ('abcxyh'.includes(ch)) o += `<i class="v">${ch}</i>`;
+    else if (ch === '²') o += '<sup>2</sup>';
+    else if (ch === '<') o += '&lt;';
+    else if (ch === '>') o += '&gt;';
+    else if (ch === '&') o += '&amp;';
+    else if (ch === '"') o += '&quot;';
+    else o += ch;
+  }
+  return o;
+}
+function esc(t) {
+  return String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+/* ---------- 채점: 식을 다항식으로 바꿔 비교 ----------
+   cx, xc, c×x, c(x) 가 모두 같은 식으로 인정되도록
+   문자 순서와 곱셈 기호를 무시하고 '같은 다항식인가'로 판정한다. */
+function parsePoly(src) {
+  const s = src.replace(/\s+/g, '').replace(/[·*]/g, '×').replace(/\^2/g, '²');
+  let i = 0;
+  const peek = () => s[i];
+  const num = n => ({ '': n });
+  const add = (p, q) => { const r = { ...p }; for (const k in q) r[k] = (r[k] || 0) + q[k]; return r; };
+  const mul = (p, q) => {
+    const r = {};
+    for (const a in p) for (const b in q) {
+      const k = (a + b).split('').sort().join('');
+      r[k] = (r[k] || 0) + p[a] * q[b];
+    }
+    return r;
+  };
+  function expr() { let p = term(); while (peek() === '+') { i++; p = add(p, term()); } return p; }
+  function term() {
+    let p = factor();
+    while (i < s.length) {
+      if (peek() === '×') { i++; p = mul(p, factor()); }
+      else if (/[abcxyh0-9(]/.test(peek())) p = mul(p, factor()); // 곱셈 기호 생략(cx)
+      else break;
+    }
+    return p;
+  }
+  function factor() { let p = atom(); while (peek() === '²') { i++; p = mul(p, p); } return p; }
+  function atom() {
+    const ch = peek();
+    if (ch === '(') { i++; const p = expr(); if (peek() !== ')') throw 0; i++; return p; }
+    if (ch && 'abcxyh'.includes(ch)) { i++; return { [ch]: 1 }; }
+    if (ch && /[0-9]/.test(ch)) { let n = ''; while (/[0-9]/.test(peek() || '')) n += s[i++]; return num(+n); }
+    throw 0;
+  }
+  if (!s) throw 0;
+  const p = expr();
+  if (i !== s.length) throw 0;
+  return p;
+}
+function samePoly(p, q) {
+  const clean = o => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== 0));
+  const a = clean(p), b = clean(q);
+  const ka = Object.keys(a), kb = Object.keys(b);
+  return ka.length === kb.length && ka.every(k => a[k] === b[k]);
+}
+/* 반환: true(정답) / false(오답) / null(식을 읽을 수 없음) */
+function gradeBlank(input, answer) {
+  let p;
+  try { p = parsePoly(input); } catch (e) { return null; }
+  return samePoly(p, parsePoly(answer));
+}
+
+/* ---------- 그림 ----------
+   변 비율 3:4:5 (a=3, b=4, c=5 → x=1.8, y=3.2, h=2.4)로 확실히 기울어진 삼각형.
+   이등변처럼 보이면 x=y로 착각하기 쉬워서 일부러 비대칭으로 그렸다. */
+const P = { A: [184, 58], B: [40, 250], C: [440, 250], D: [184, 250] };
+const RIGHT = ['BAC', 'BDA', 'ADC'];
+
+function unit(from, to) {
+  const dx = to[0] - from[0], dy = to[1] - from[1], L = Math.hypot(dx, dy);
+  return [dx / L, dy / L];
+}
+function angleMark(name, color, opacity) {
+  const V = P[name[1]], u1 = unit(V, P[name[0]]), u2 = unit(V, P[name[2]]);
+  if (RIGHT.includes(name)) {
+    const r = 16, p1 = [V[0] + u1[0]*r, V[1] + u1[1]*r], p3 = [V[0] + u2[0]*r, V[1] + u2[1]*r];
+    const p2 = [p1[0] + u2[0]*r, p1[1] + u2[1]*r];
+    return `<path d="M${V} L${p1} L${p2} L${p3} Z" fill="${color}" fill-opacity="${opacity}" stroke="${color}" stroke-width="1.6"/>`;
+  }
+  const r = 30, p1 = [V[0] + u1[0]*r, V[1] + u1[1]*r], p2 = [V[0] + u2[0]*r, V[1] + u2[1]*r];
+  const sweep = (u1[0]*u2[1] - u1[1]*u2[0]) > 0 ? 1 : 0;
+  return `<path d="M${V} L${p1} A${r} ${r} 0 0 ${sweep} ${p2} Z" fill="${color}" fill-opacity="${opacity}" stroke="${color}" stroke-width="1.6"/>`;
+}
+function drawFigure(hl = {}) {
+  const tri = hl.tri || [], sides = hl.sides || [], angles = hl.angles || [];
+  let s = `<svg viewBox="0 0 480 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="직각삼각형 ABC 그림">`;
+  // 1) 삼각형 색칠 (큰 삼각형을 먼저, 작은 삼각형을 위에)
+  for (const t of ['ABC', 'DBA', 'DAC']) if (tri.includes(t)) {
+    s += `<polygon points="${t.split('').map(k => P[k].join(',')).join(' ')}" fill="${COLORS[t]}" fill-opacity="${t === 'ABC' ? .13 : .26}"/>`;
+  }
+  // 2) 형광펜으로 변 강조
+  //    'BC'      → 노란 형광펜
+  //    'BC:ABC'  → 그 삼각형 색 형광펜. 먼저 나온 삼각형은 굵게, 다음 삼각형은 가늘게 위에 칠해서
+  //               BC와 BD처럼 겹치는 변(또는 두 삼각형이 함께 쓰는 변)도 구별되게 한다.
+  const triOrder = [];
+  for (const sd of sides) { const t = sd.split(':')[1]; if (t && !triOrder.includes(t)) triOrder.push(t); }
+  const sorted = [...sides].sort((u, v) => triOrder.indexOf(u.split(':')[1]) - triOrder.indexOf(v.split(':')[1]));
+  for (const sd of sorted) {
+    const [seg, t] = sd.split(':'), p = P[seg[0]], q = P[seg[1]];
+    const color = t ? COLORS[t] : 'var(--marker)';
+    const first = t && triOrder.indexOf(t) === 0;
+    const w = t ? (first ? 18 : 9) : 13;
+    const op = t ? (first ? .4 : .9) : .75;
+    s += `<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="${color}" stroke-width="${w}" stroke-linecap="round" opacity="${op}"/>`;
+  }
+  // 3) 기본 직각 표시(회색) — 강조되지 않은 경우만
+  for (const r of ['BAC', 'ADC']) if (!angles.includes(r)) s += angleMark(r, '#6b7280', 0);
+  // 4) 강조한 각
+  for (const a of angles) s += angleMark(a, 'var(--angle)', .28);
+  // 5) 선분
+  const seg = (a, b) => `<line x1="${P[a][0]}" y1="${P[a][1]}" x2="${P[b][0]}" y2="${P[b][1]}" stroke="#1f2328" stroke-width="2.4" stroke-linecap="round"/>`;
+  s += seg('A','B') + seg('A','C') + seg('B','C') + seg('A','D');
+  for (const k of 'ABCD') s += `<circle cx="${P[k][0]}" cy="${P[k][1]}" r="3" fill="#1f2328"/>`;
+  // 6) 꼭짓점 이름
+  const T = (x, y, t, extra = '') => `<text x="${x}" y="${y}" ${extra}>${t}</text>`;
+  s += `<g font-family="Times New Roman,serif" font-size="22" fill="#1f2328" text-anchor="middle">`;
+  s += T(184, 46, 'A') + T(24, 258, 'B') + T(458, 258, 'C') + T(184, 276, 'D');
+  s += `</g>`;
+  // 7) 길이 문자 (기울임)
+  s += `<g font-family="Times New Roman,serif" font-style="italic" font-size="24" fill="#1d3fa8" text-anchor="middle">`;
+  s += T(98, 146, 'a') + T(328, 146, 'b') + T(198, 176, 'h') + T(112, 276, 'x') + T(312, 276, 'y');
+  // c는 BC 전체를 묶는 괄호 아래에
+  s += `</g><path d="M40 288 v8 h400 v-8" fill="none" stroke="#1d3fa8" stroke-width="1.4"/>`;
+  s += T(240, 316, 'c', 'font-family="Times New Roman,serif" font-style="italic" font-size="24" fill="#1d3fa8" text-anchor="middle"');
+  s += `</svg>`;
+  const legend = ['ABC', 'DBA', 'DAC'].filter(t => tri.includes(t))
+    .map(t => `<span class="chip" style="background:${COLORS[t]}">△${t}</span>`).join('');
+  return s + `<div class="legend">${legend}</div>`;
+}
+
+/* ---------- 화면: 시작 ---------- */
+function isLocked(i) {
+  const need = MISSIONS[i].needs || [];
+  return need.some(n => !state.done.has(n));
+}
+function renderStart() {
+  document.querySelectorAll('.toast').forEach(e => e.remove());
+  document.body.classList.remove('haskp');
+  const items = MISSIONS.map((m, i) => {
+    const done = state.done.has(i), locked = isLocked(i);
+    const st = done ? '✓ 완료' : locked ? '🔒 미션 1·2 후' : '';
+    return `<button class="mitem ${done ? 'done' : ''} ${locked ? 'locked' : ''}" data-m="${i}">
+      <span class="mnum">${i + 1}</span>
+      <span><div class="f">${fmt(m.formula)}</div><div class="s">${fmt(m.basis)}</div></span>
+      <span class="st">${st}</span></button>`;
+  }).join('');
+  const allDone = state.done.size === MISSIONS.length;
+  app.innerHTML = `<div class="wrap">
+    <h1 class="title">직각삼각형 5공식</h1>
+    <p class="subtitle">∠A = 90°인 직각삼각형 ABC에서 꼭짓점 A에서 빗변 BC에 내린 수선의 발을 D라고 할 때</p>
+    <div class="card">
+      <div class="figbox" style="position:static;border:0;padding:0;margin:0">${drawFigure({})}</div>
+      <div class="defs">
+        <span>AB = ${fmt('a')}</span><span>AC = ${fmt('b')}</span><span>BC = ${fmt('c')}</span>
+        <span>BD = ${fmt('x')}</span><span>CD = ${fmt('y')}</span><span>AD = ${fmt('h')}</span>
+      </div>
+    </div>
+    <div class="seg" role="tablist">
+      <button data-mode="solo" class="${state.mode === 'solo' ? 'on' : ''}">개인 풀이</button>
+      <button data-mode="tv" class="${state.mode === 'tv' ? 'on' : ''}">TV 시연</button>
+    </div>
+    <div class="mlist">${items}</div>
+    ${allDone ? `<div class="actions"><button class="btn primary" style="width:100%" id="sumBtn">다섯 공식 모아보기</button></div>` : ''}
+  </div>`;
+  app.querySelectorAll('[data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+  app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => {
+    const i = +b.dataset.m;
+    if (isLocked(i)) return toast('미션 1과 미션 2를 먼저 완료하세요');
+    startMission(i);
+  });
+  const sb = document.getElementById('sumBtn'); if (sb) sb.onclick = showSummary;
+  window.scrollTo(0, 0);
+}
+function setMode(mode) {
+  state.mode = mode;
+  document.body.classList.toggle('tv', mode === 'tv');
+  renderStart();
+}
+
+/* ---------- 화면: 미션 ---------- */
+function startMission(i) {
+  state.m = i; state.s = 0; state.proof = [];
+  resetStep();
+  renderMission();
+  window.scrollTo(0, 0);
+}
+function resetStep() {
+  state.phase = 'answer'; state.input = ''; state.essay = '';
+  state.wrong = 0; state.hint = 0; state.picked = null; state.feedback = null;
+}
+const curMission = () => MISSIONS[state.m];
+const curStep = () => curMission().steps[state.s];
+const isTV = () => state.mode === 'tv';
+
+function renderMission() {
+  document.querySelectorAll('.toast').forEach(e => e.remove());
+  const M = curMission(), st = curStep(), n = M.steps.length;
+  const showKeypad = st.type === 'blank' && state.phase === 'answer';
+  document.body.classList.toggle('haskp', showKeypad);
+
+  app.innerHTML = `
+  <div class="topbar"><div class="in">
+    <button class="back" id="backBtn" aria-label="목록으로">←</button>
+    <div class="t">미션 ${state.m + 1} &nbsp;${fmt(M.formula)}</div>
+    <div class="prog">${state.s + 1}/${n}</div>
+  </div><div class="pbar"><div style="width:${(state.s / n) * 100}%"></div></div></div>
+  <div class="mbody">
+    <div class="figbox">${drawFigure(st.hl)}</div>
+    <div class="panel">
+      <div class="card" id="stepCard">${renderStepBody(st)}</div>
+      ${showKeypad ? renderKeypad() : ''}
+      ${renderProof()}
+    </div>
+  </div>`;
+  bindStep(st);
+  document.getElementById('backBtn').onclick = askLeave;
+}
+
+function renderStepBody(st) {
+  let h = `<div class="stephead">${state.s + 1}단계 · ${{choice:'고르기', blank:'빈칸 채우기', essay:'서술하기'}[st.type]}</div>`;
+  h += `<p class="q">${fmt(st.q)}</p>`;
+
+  if (st.type === 'choice') {
+    h += `<div class="opts">` + st.options.map((o, i) => {
+      let cls = '';
+      if ((state.phase === 'correct' || state.phase === 'revealed') && i === st.answer) cls = 'right';
+      else if (state.phase === 'answer' && state.picked === i) cls = 'wrong';
+      return `<button class="opt ${cls}" data-opt="${i}">${fmt(o)}</button>`;
+    }).join('') + `</div>`;
+  }
+
+  if (st.type === 'blank') {
+    let inner, cls = 'blank';
+    if (state.phase === 'answer') {
+      inner = fmt(state.input) + '<span class="caret"></span>';
+      if (state.input) cls += ' filled';
+      if (state.feedback && state.feedback.kind === 'bad') cls += ' wrong';
+    } else {
+      inner = fmt(state.phase === 'revealed' ? st.answer : state.input);
+      cls += ' filled right';
+    }
+    const [before, after] = st.template.split('□');
+    h += `<div class="tmpl">${fmt(before)}<span class="${cls}">${inner}</span>${fmt(after || '')}</div>`;
+  }
+
+  if (st.type === 'essay') {
+    // 개인 풀이: 쓰기 → 내 답과 모범 답안 나란히 / TV 시연: 말로 답한 뒤 모범 답안만 공개
+    if (state.phase === 'answer') {
+      if (!isTV()) h += `<textarea id="essay" placeholder="여기에 이유를 써 보세요">${esc(state.essay)}</textarea>`;
+    } else {
+      h += `<div class="cmp">
+        ${isTV() ? '' : `<div class="box mine"><div class="lab">내 답</div>${esc(state.essay)}</div>`}
+        <div class="box model"><div class="lab">모범 답안</div>${fmt(st.model)}</div></div>`;
+    }
+  }
+
+  if (state.feedback) h += `<div class="fb ${state.feedback.kind}">${fmt(state.feedback.text)}</div>`;
+
+  if (st.hints && state.hint > 0) {
+    h += `<div class="hints">` + st.hints.slice(0, state.hint)
+      .map((t, i) => `<div class="hint"><b>힌트 ${i + 1}</b> · ${fmt(t)}</div>`).join('') + `</div>`;
+  }
+
+  h += `<div class="actions row">${renderButtons(st)}</div>`;
+  return h;
+}
+
+function renderButtons(st) {
+  const last = state.s === curMission().steps.length - 1;
+  const nextLabel = last ? '미션 완료 ✓' : '다음 단계 →';
+  if (state.phase === 'correct' || state.phase === 'revealed') {
+    return `<button class="btn primary" data-act="next">${nextLabel}</button>`;
+  }
+  if (st.type === 'essay') {
+    if (isTV()) return `<button class="btn primary" data-act="model">모범 답안 보기</button>`;
+    if (state.phase === 'compare') {
+      return `<button class="btn ghost" data-act="retry">다시 볼게요</button>
+              <button class="btn ok" data-act="selfok">맞게 썼어요 →</button>`;
+    }
+    return `<button class="btn primary" data-act="compare">모범 답안과 비교하기</button>`;
+  }
+  // 선택형·빈칸형
+  let b = '';
+  const hasMoreHint = st.hints && state.hint < st.hints.length;
+  if (hasMoreHint) b += `<button class="btn ghost" data-act="hint">힌트${state.hint ? ' 더 보기' : ''}</button>`;
+  if (st.type === 'blank') b += `<button class="btn primary" data-act="check">확인</button>`;
+  if (isTV()) b += `<button class="btn" data-act="reveal">정답 공개</button>`;
+  else if (state.wrong >= WRONG_LIMIT) b += `<button class="btn" data-act="reveal">정답 보고 넘어가기</button>`;
+  return b;
+}
+
+function renderKeypad() {
+  const keys = ['a','b','c','x','y','h','²','×','+','(',')','⌫'];
+  return `<div class="keypad"><div class="grid">` + keys.map(k => {
+    const fn = '²×+()⌫'.includes(k);
+    const label = 'abcxyh'.includes(k) ? fmt(k) : k;
+    return `<button class="key ${fn ? 'fn' : ''}" data-key="${k}">${label}</button>`;
+  }).join('') + `</div></div>`;
+}
+
+function renderProof() {
+  if (!state.proof.length) return '';
+  const lines = state.proof.map(t => `<li>${fmt(t)}</li>`).join('') + `<li class="now">…</li>`;
+  return `<details class="proof card" open><summary>지금까지의 증명 (${state.proof.length}줄)</summary><ol>${lines}</ol></details>`;
+}
+
+/* ---------- 버튼 연결 ---------- */
+function bindStep(st) {
+  app.querySelectorAll('[data-opt]').forEach(b => b.onclick = () => pickOption(+b.dataset.opt));
+  app.querySelectorAll('[data-key]').forEach(b => b.onclick = () => pressKey(b.dataset.key));
+  app.querySelectorAll('[data-act]').forEach(b => b.onclick = () => ACT[b.dataset.act]());
+  const ta = document.getElementById('essay');
+  if (ta) ta.oninput = () => { state.essay = ta.value; };
+}
+
+const ACT = {
+  hint() { state.hint++; renderMission(); },
+  check() { checkBlank(); },
+  reveal() {
+    state.phase = 'revealed';
+    state.feedback = { kind: 'info', text: '정답을 확인하고 다음 단계로 넘어가요.' };
+    state.proof.push(curStep().proof);
+    renderMission();
+  },
+  next() { goNext(); },
+  compare() {
+    if (!state.essay.trim()) return toast('답을 입력해 주세요');
+    state.phase = 'compare';
+    state.feedback = { kind: 'info', text: '모범 답안과 비교해 보세요. 핵심 근거가 모두 들어 있나요?' };
+    renderMission();
+  },
+  retry() { state.phase = 'answer'; state.feedback = null; renderMission(); focusEssay(); },
+  selfok() {
+    state.phase = 'correct';
+    state.feedback = { kind: 'ok', text: '좋아요! 이 내용이 증명에 들어가요.' };
+    state.proof.push(curStep().proof);
+    renderMission();
+  },
+  model() { // TV 모드 서술형: 모범 답안 바로 공개
+    state.phase = 'correct'; state.feedback = null;
+    state.proof.push(curStep().proof);
+    renderMission();
+  },
+};
+function focusEssay() { const t = document.getElementById('essay'); if (t) { t.focus(); t.setSelectionRange(t.value.length, t.value.length); } }
+
+function pickOption(i) {
+  if (state.phase !== 'answer') return;
+  const st = curStep();
+  state.picked = i;
+  if (i === st.answer) {
+    state.phase = 'correct';
+    state.feedback = { kind: 'ok', text: '정답!' };
+    state.proof.push(st.proof);
+  } else {
+    state.wrong++;
+    state.feedback = { kind: 'bad', text: wrongText() };
+  }
+  renderMission();
+}
+function wrongText() {
+  if (isTV()) return '다시 생각해 봐요.';
+  return state.wrong >= WRONG_LIMIT ? '아직 아니에요. 힌트를 보거나 정답을 보고 넘어갈 수 있어요.'
+                                    : '다시 생각해 봐요. 막히면 [힌트]를 눌러 보세요.';
+}
+function pressKey(k) {
+  if (state.phase !== 'answer') return;
+  if (k === '⌫') state.input = [...state.input].slice(0, -1).join('');
+  else if (state.input.length < 16) state.input += k;
+  if (state.feedback && state.feedback.kind === 'bad') state.feedback = null;
+  // 키패드는 다시 그리지 않고 빈칸만 바꿔 깜박임을 줄인다
+  document.getElementById('stepCard').innerHTML = renderStepBody(curStep());
+  bindStep(curStep());
+}
+function checkBlank() {
+  if (state.phase !== 'answer') return;
+  const st = curStep();
+  if (!state.input.trim()) return toast('답을 입력해 주세요');
+  const r = gradeBlank(state.input, st.answer);
+  if (r === null) {
+    state.feedback = { kind: 'bad', text: '식을 읽을 수 없어요. 괄호나 기호를 확인해 주세요.' };
+  } else if (r) {
+    state.phase = 'correct';
+    state.feedback = { kind: 'ok', text: '정답!' };
+    state.proof.push(st.proof);
+  } else {
+    state.wrong++;
+    state.feedback = { kind: 'bad', text: wrongText() };
+  }
+  renderMission();
+}
+function goNext() {
+  const M = curMission();
+  if (state.s < M.steps.length - 1) {
+    state.s++; resetStep(); renderMission();
+    // 휴대폰에서 새 단계 카드가 보이도록
+    if (!isTV()) document.getElementById('stepCard').scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  } else {
+    state.done.add(state.m);
+    showComplete();
+  }
+}
+
+/* 물리 키보드(교실 PC·TV 시연용) — 빈칸 단계에서만 */
+document.addEventListener('keydown', e => {
+  if (state.m === null || document.querySelector('.overlay')) return;
+  const st = curStep && state.m !== null ? curStep() : null;
+  if (!st || st.type !== 'blank' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'Enter') { e.preventDefault(); return state.phase === 'answer' ? checkBlank() : goNext(); }
+  if (state.phase !== 'answer') return;
+  const map = { Backspace: '⌫', '^': '²', '2': '²', '*': '×', '+': '+', '(': '(', ')': ')' };
+  let k = map[e.key] || (('abcxyh').includes(e.key.toLowerCase()) && e.key.length === 1 ? e.key.toLowerCase() : null);
+  if (k) { e.preventDefault(); pressKey(k); }
+});
+
+/* ---------- 팝업 ---------- */
+function modal(html, bind) {
+  const ov = document.createElement('div');
+  ov.className = 'overlay';
+  ov.innerHTML = `<div class="modal">${html}</div>`;
+  document.body.appendChild(ov);
+  bind(ov, () => ov.remove());
+}
+function askLeave() {
+  const started = state.s > 0 || state.phase !== 'answer' || state.input || state.essay;
+  if (!started) return goHome();
+  modal(`<h2>목록으로 나갈까요?</h2><p>진행 중인 풀이가 사라져요. 다시 들어오면 처음부터 시작해요.</p>
+    <div class="row"><button class="btn" data-x>계속 풀기</button><button class="btn primary" data-go>나가기</button></div>`,
+    (ov, close) => { ov.querySelector('[data-x]').onclick = close; ov.querySelector('[data-go]').onclick = () => { close(); goHome(); }; });
+}
+function goHome() { state.m = null; renderStart(); }
+
+function showComplete() {
+  const i = state.m, M = MISSIONS[i];
+  // 다음에 풀 수 있는 미완료 미션
+  const next = MISSIONS.findIndex((_, k) => k !== i && !state.done.has(k) && !isLocked(k));
+  const allDone = state.done.size === MISSIONS.length;
+  const lines = state.proof.map(t => `<li>${fmt(t)}</li>`).join('');
+  modal(`<h2>미션 ${i + 1} 완료!</h2>
+    <div class="big">${fmt(M.formula)}</div>
+    <div class="sheet"><ol>${lines}</ol></div>
+    <p class="note">완성된 증명을 공책에 옮겨 적어 보세요.</p>
+    <div class="row">
+      <button class="btn" data-home>목록으로</button>
+      ${allDone ? `<button class="btn primary" data-sum>다섯 공식 모아보기</button>`
+        : next >= 0 ? `<button class="btn primary" data-next>미션 ${next + 1} 시작 →</button>` : ''}
+    </div>`, (ov, close) => {
+      ov.querySelector('[data-home]').onclick = () => { close(); goHome(); };
+      const n = ov.querySelector('[data-next]'); if (n) n.onclick = () => { close(); startMission(next); };
+      const s = ov.querySelector('[data-sum]'); if (s) s.onclick = () => { close(); goHome(); showSummary(); };
+    });
+}
+function showSummary() {
+  const rows = MISSIONS.map((m, i) => `<div><span class="f">${fmt(m.formula)}</span><span class="s">미션 ${i + 1}<br>${fmt(m.basis)}</span></div>`).join('');
+  modal(`<h2>직각삼각형 5공식</h2>
+    <p class="note" style="margin:2px 0 0">∠A = 90°, AD ⊥ BC일 때<br>AB = ${fmt('a')}, AC = ${fmt('b')}, BC = ${fmt('c')}, BD = ${fmt('x')}, CD = ${fmt('y')}, AD = ${fmt('h')}</p>
+    <div class="sumlist">${rows}</div>
+    <div class="row"><button class="btn primary" data-x>닫기</button></div>`,
+    (ov, close) => { ov.querySelector('[data-x]').onclick = close; });
+}
+
+let toastTimer;
+function toast(t) {
+  document.querySelectorAll('.toast').forEach(e => e.remove());
+  const el = document.createElement('div');
+  el.className = 'toast'; el.textContent = t;
+  document.body.appendChild(el);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.remove(), 1800);
+}
+
+renderStart();
+</script>
+</body>
+</html>
